@@ -9,23 +9,50 @@
 </head>
 <body>
 <div id="app">
-<header><a class="brand" href="#" aria-label="FunTok home"><img src="assets/funtok-logo.png" alt="FunTok"></a><button id="searchBtn">🔎</button></header>
-<main id="feed" class="feed"></main>
+<header>
+  <a class="brand" href="#" aria-label="FunTok home"><img src="assets/funtok-logo.png" alt="FunTok"></a>
+  <button id="searchBtn">🔎</button>
+</header>
+
+<main id="feed" class="feed">
+  <!-- The main video swipe panels will inject here dynamically via app.js -->
+</main>
+
+<!-- NEW: Embedded Search Engine Panel Framework -->
+<div id="search-view" class="view-panel" style="padding: 20px; display: none; height: calc(100% - 65px); overflow-y: auto;">
+  <h2 style="margin-top: 60px; font-weight: 900; font-size: 26px; color: #fff;">Explore Channels</h2>
+  
+  <div class="search-bar-wrapper" style="display: flex; gap: 8px; margin-bottom: 20px;">
+    <input type="text" id="search-input" placeholder="Search captions, tags, keywords..." 
+           style="flex: 1; padding: 12px 16px; background: #16161a; border: 1px solid #333; border-radius: 12px; color: #fff; font-size: 14px; outline: none;">
+    <button id="search-btn" style="padding: 12px 18px; border: 0; background: #ff2d7a; color: #fff; font-weight: bold; border-radius: 12px; cursor: pointer;">🔍</button>
+  </div>
+
+  <!-- Real-time database lookup grid template target -->
+  <div id="search-results-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding-bottom: 40px;">
+    <p class="search-notice" style="color: #666; grid-column: span 2; text-align: center; margin-top: 40px;">Type a phrase above to scan database archives...</p>
+  </div>
+</div>
+
 <nav>
 <button class="active" data-page="home">⌂<span>Home</span></button>
 <button data-page="trending">🔥<span>Trending</span></button>
 <button id="uploadBtn" class="plus">＋</button>
-<button data-page="search">🔍<span>Search</span></button>
+<button data-page="search" id="navSearchBtn">🔍<span>Search</span></button>
 <button id="profileBtn">👤<span>Profile</span></button>
 </nav>
+
 <div id="authModal" class="modal"><div class="panel"><button class="close" onclick="hide('authModal')">✕</button>
 <h2>Welcome to FunTok</h2><input id="email" type="email" placeholder="Email"><input id="password" type="password" placeholder="Password">
 <div class="row"><button id="signup">Create account</button><button id="login">Log in</button></div><p id="authMsg"></p></div></div>
+
 <div id="uploadModal" class="modal"><div class="panel"><button class="close" onclick="hide('uploadModal')">✕</button>
 <h2>Upload a video</h2><input id="caption" maxlength="150" placeholder="Caption"><input id="videoFile" type="file" accept="video/mp4,video/webm,video/quicktime">
 <button id="publish">Publish</button><p id="uploadMsg"></p></div></div>
+
 <div id="profileModal" class="modal"><div class="panel"><button class="close" onclick="hide('profileModal')">✕</button><h2>Profile</h2><p id="profileText">Not signed in.</p><button id="authOpen">Sign in / Sign up</button><button id="logout">Log out</button></div></div>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script src="app.js"></script>

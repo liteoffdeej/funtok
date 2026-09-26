@@ -1,24 +1,213 @@
-const cfg=window.FUNTOK_CONFIG||{};const ready=cfg.SUPABASE_URL?.startsWith("http")&&cfg.SUPABASE_KEY&&cfg.SUPABASE_KEY!=="YOUR_SUPABASE_PUBLISHABLE_OR_ANON_KEY";
-const sb=ready?supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_KEY):null;
-const feed=document.getElementById("feed");
-const demo=[
- {username:"@funcreator",caption:"Welcome to FunTok! 🎉",video_url:""},
- {username:"@funnyhub",caption:"When your friend says “I'm almost there” 😂",video_url:""},
- {username:"@trendzone",caption:"New trends, new memories. ✨",video_url:""}
+const cfg = window.FUNTOK_CONFIG || {};
+const ready = cfg.SUPABASE_URL?.startsWith("http") && cfg.SUPABASE_KEY && cfg.SUPABASE_KEY !== "YOUR_SUPABASE_PUBLISHABLE_OR_ANON_KEY";
+const sb = ready ? supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_KEY) : null;
+const feed = document.getElementById("feed");
+const searchView = document.getElementById("search-view");
+
+const demo = [
+ { username: "@funcreator", caption: "Welcome to FunTok! 🎉", video_url: "" },
+ { username: "@funnyhub", caption: "When your friend says “I'm almost there” 😂", video_url: "" },
+ { username: "@trendzone", caption: "New trends, new memories. ✨", video_url: "" }
 ];
-function show(id){document.getElementById(id).style.display="flex"}function hide(id){document.getElementById(id).style.display="none"}
-function render(rows){feed.innerHTML=rows.map((x,i)=>`<section class="card">${x.video_url?`<video src="${esc(x.video_url)}" autoplay muted loop playsinline></video>`:`<div class="fallback">▶</div>`}<div class="shade"></div><div class="info"><div class="user">${esc(x.username||"@user")}</div><div class="caption">${esc(x.caption||"")}</div></div><div class="actions"><button class="act" onclick="like(this)">♡</button><span class="num">0</span><button class="act" onclick="report()">⚑</button><span class="num">Report</span><button class="act" onclick="share()">↗</button></div></section>`).join("")}
-function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
-function like(b){b.textContent=b.textContent==="♡"?"♥":"♡";b.nextElementSibling.textContent=b.textContent==="♥"?"1":"0"}
-function share(){navigator.clipboard?.writeText(location.href);alert("FunTok link copied!")}
-function report(){alert("Report received. A real deployment should store reports for moderation.")}
-async function load(){if(!sb){render(demo);return}const {data,error}=await sb.from("videos").select("id,caption,video_url,profiles(username)").order("created_at",{ascending:false}).limit(50);if(error){console.error(error);render(demo);return}render((data||[]).map(v=>({username:v.profiles?.username||"@user",caption:v.caption,video_url:v.video_url})))}
-document.getElementById("uploadBtn").onclick=()=>{if(!sb)return alert("Add your Supabase settings in config.js first.");show("uploadModal")}
-document.getElementById("profileBtn").onclick=async()=>{show("profileModal");if(sb){const {data}=await sb.auth.getUser();document.getElementById("profileText").textContent=data.user?`Signed in as ${data.user.email}`:"Not signed in."}}
-document.getElementById("authOpen").onclick=()=>show("authModal")
-document.getElementById("signup").onclick=async()=>auth(true)
-document.getElementById("login").onclick=async()=>auth(false)
-async function auth(signup){if(!sb)return;const email=document.getElementById("email").value,password=document.getElementById("password").value;const r=signup?await sb.auth.signUp({email,password}):await sb.auth.signInWithPassword({email,password});document.getElementById("authMsg").textContent=r.error?r.error.message:"Success! Check your email if confirmation is enabled.";if(!r.error){hide("authModal");}}
-document.getElementById("logout").onclick=async()=>{if(sb)await sb.auth.signOut();document.getElementById("profileText").textContent="Not signed in."}
-document.getElementById("publish").onclick=async()=>{if(!sb)return;const {data:{user}}=await sb.auth.getUser();if(!user)return alert("Please sign in first.");const f=document.getElementById("videoFile").files[0],caption=document.getElementById("caption").value.trim();if(!f)return alert("Choose a video.");if(f.size>100*1024*1024)return alert("Keep videos under 100 MB for this version.");const path=`${user.id}/${crypto.randomUUID()}-${f.name.replace(/[^a-zA-Z0-9._-]/g,"_")}`;const up=await sb.storage.from("videos").upload(path,f,{contentType:f.type,upsert:false});if(up.error)return alert(up.error.message);const pub=sb.storage.from("videos").getPublicUrl(path);const ins=await sb.from("videos").insert({user_id:user.id,caption,video_path:path,video_url:pub.data.publicUrl});if(ins.error)return alert(ins.error.message);hide("uploadModal");load()}
-load();
+
+// Cache map tracking user follow states locally to prevent unnecessary database queries
+let localFollowCache = new Set();
+
+function show(id) { document.getElementById(id).style.display = "flex" }
+function hide(id) { document.getElementById(id).style.display = "none" }
+
+function esc(s) { 
+  return String(s).replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "'" }[m])); 
+}
+
+// Global Feed Rendering Engine (Enhanced with follow button hooks)
+function render(rows) {
+  feed.innerHTML = rows.map((x) => {
+    // Generate follow button UI state depending on session cache tracking matches
+    const isFollowing = localFollowCache.has(x.user_id);
+    const btnText = isFollowing ? "Following" : "Follow";
+    const btnStyle = isFollowing ? "background:#333;" : "background:#ff2d7a;";
+    
+    // Hide follow button overlay layers completely if it belongs to your own user session
+    const hideSelfFollow = (sb && sb.auth.getUser() && x.user_id === sb.auth.user()?.id) ? "display:none;" : "";
+
+    return `
+      <section class="card" data-video-id="${x.id}">
+        ${x.video_url ? `<video src="${esc(x.video_url)}" autoplay muted loop playsinline></video>` : `<div class="fallback">▶</div>`}
+        <div class="shade"></div>
+        <div class="info">
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+            <div class="user">${esc(x.username || "@user")}</div>
+            ${sb && x.user_id ? `<button class="follow-toggle-btn" style="padding:4px 10px; border:0; color:#fff; border-radius:6px; font-size:11px; font-weight:bold; cursor:pointer; ${btnStyle} ${hideSelfFollow}" onclick="handleFollowToggle('${x.user_id}', this)">${btnText}</button>` : ''}
+          </div>
+          <div class="caption">${esc(x.caption || "")}</div>
+        </div>
+        <div class="actions">
+          <button class="act" onclick="like(this)">♡</button>
+          <span class="num">0</span>
+          <button class="act" onclick="report()">⚑</button>
+          <span class="num">Report</span>
+          <button class="act" onclick="share()">↗</button>
+        </div>
+      </section>
+    `;
+  }).join("");
+}
+
+function like(b) { b.textContent = b.textContent === "♡" ? "♥" : "♡"; b.nextElementSibling.textContent = b.textContent === "♥" ? "1" : "0" }
+function share() { navigator.clipboard?.writeText(location.href); alert("FunTok link copied!") }
+function report() { alert("Report received. Thank you for making FunTok safe!") }
+
+// Fetching feeds from live servers and syncing relation caches simultaneously
+async function load() {
+  if (!sb) {
+    render(demo);
+    return;
+  }
+  
+  // Sync your following relationships list first to calculate button labels correctly during loop render cycles
+  const currentSessionUser = sb.auth.user();
+  if (currentSessionUser) {
+    const { data: followRecords } = await sb.from("follows").select("following_id").eq("follower_id", currentSessionUser.id);
+    localFollowCache = new Set((followRecords || []).map(f => f.following_id));
+  }
+
+  const { data, error } = await sb.from("videos").select("id,caption,video_url,user_id,profiles(username)").order("created_at", { ascending: false }).limit(50);
+  if (error) {
+    console.error(error);
+    render(demo);
+    return;
+  }
+  
+  render((data || []).map(v => ({
+    id: v.id,
+    user_id: v.user_id,
+    username: v.profiles?.username || "@user",
+    caption: v.caption,
+    video_url: v.video_url
+  })));
+}
+
+// Navigation Tab Router Logic Control Engine
+document.querySelectorAll("nav button").forEach(btn => {
+  btn.onclick = (e) => {
+    const targetPage = btn.getAttribute("data-page");
+    if (!targetPage) return; // Ignore buttons like the Upload Plus button
+
+    document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+
+    if (targetPage === "search") {
+      feed.style.display = "none";
+      searchView.style.display = "block";
+    } else {
+      searchView.style.display = "none";
+      feed.style.display = "block";
+      if (targetPage === "home" || targetPage === "trending") {
+        load(); // Refresh live system contents
+      }
+    }
+  }
+});
+
+// Advanced Video Keyword Search Architecture Lookup
+async function executeVideoSearch() {
+  const queryText = document.getElementById('search-input').value.trim();
+  const resultsGrid = document.getElementById('search-results-grid');
+  
+  if (!queryText) {
+    resultsGrid.innerHTML = '<p class="search-notice" style="color:#666; grid-column:span 2; text-align:center; margin-top:40px;">Type a phrase above to scan database archives...</p>';
+    return;
+  }
+  
+  resultsGrid.innerHTML = '<p style="color:#aaa; grid-column:span 2; text-align:center; margin-top:40px;">Searching database feeds...</p>';
+  
+  const { data: matchedVideos, error } = await sb
+    .from('videos')
+    .select('*, profiles(username)')
+    .ilike('caption', `%${queryText}%`);
+    
+  if (error || !matchedVideos || matchedVideos.length === 0) {
+    resultsGrid.innerHTML = '<p style="color:#ff2d7a; grid-column:span 2; text-align:center; margin-top:40px;">No matching video feeds found.</p>';
+    return;
+  }
+  
+  resultsGrid.innerHTML = '';
+  matchedVideos.forEach(vid => {
+    const gridItem = document.createElement('div');
+    gridItem.style.cssText = "background:#121214; border-radius:12px; overflow:hidden; position:relative; height:200px; cursor:pointer; border:1px solid #222;";
+    gridItem.innerHTML = `
+      <video src="${vid.video_url}" style="width:100%; height:100%; object-fit:cover; pointer-events:none;"></video>
+      <div style="position:absolute; inset:0; background:linear-gradient(transparent 50%, rgba(0,0,0,0.9)); padding:8px; display:flex; flex-direction:column; justify-content:flex-end;">
+        <span style="font-size:11px; color:#ff2d7a; font-weight:800;">@${vid.profiles?.username || 'user'}</span>
+        <span style="font-size:12px; color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${vid.caption}</span>
+      </div>
+    `;
+    gridItem.onclick = () => {
+      // Direct Navigation Jumper: Switch tabs back to feed window view pane and isolate selected match card index context
+      searchView.style.display = "none";
+      feed.style.display = "block";
+      document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
+      document.querySelector('nav button[data-page="home"]').classList.add("active");
+      render([{ id: vid.id, user_id: vid.user_id, username: vid.profiles?.username || "@user", caption: vid.caption, video_url: vid.video_url }]);
+    };
+    resultsGrid.appendChild(gridItem);
+  });
+}
+
+document.getElementById('search-btn').onclick = executeVideoSearch;
+document.getElementById('search-input').onkeydown = (e) => { if (e.key === 'Enter') executeVideoSearch(); };
+
+// Social Relations Management Engine Logic Tether
+async function handleFollowToggle(targetCreatorId, buttonElement) {
+  if (!sb) return;
+  const currentSessionUser = sb.auth.user();
+  if (!currentSessionUser) {
+    alert("Please sign into your creator account layout first to follow profiles!");
+    return;
+  }
+
+  if (localFollowCache.has(targetCreatorId)) {
+    // Unfollow Action Route
+    const { error } = await sb.from('follows').delete().eq('follower_id', currentSessionUser.id).eq('following_id', targetCreatorId);
+    if (!error) {
+      localFollowCache.delete(targetCreatorId);
+      buttonElement.innerText = "Follow";
+      buttonElement.style.background = "#ff2d7a";
+    }
+  } else {
+    // Follow Action Route
+    const { error } = await sb.from('follows').insert([{ follower_id: currentSessionUser.id, following_id: targetCreatorId }]);
+    if (!error) {
+      localFollowCache.add(targetCreatorId);
+      buttonElement.innerText = "Following";
+      buttonElement.style.background = "#333";
+    }
+  }
+}
+
+// Authentication Controller Interfaces Management Bindings
+document.getElementById("uploadBtn").onclick = () => { if (!sb) return alert("Add your Supabase settings in config.js first."); show("uploadModal") }
+document.getElementById("profileBtn").onclick = async () => {
+  show("profileModal");
+  if (sb) {
+    const { data } = await sb.auth.getUser();
+    document.getElementById("profileText").textContent = data.user ? `Signed in as ${data.user.email}` : "Not signed in."
+  }
+}
+document.getElementById("searchBtn").onclick = () => { document.querySelector('nav button[data-page="search"]').click(); }
+document.getElementById("authOpen").onclick = () => show("authModal")
+document.getElementById("signup").onclick = async () => auth(true)
+document.getElementById("login").onclick = async () => auth(false)
+
+async function auth(signup) {
+  if (!sb) return;
+  const email = document.getElementById("email").value, password = document.getElementById("password").value;
+  const r = signup ? await sb.auth.signUp({ email, password }) : await sb.auth.signInWithPassword({ email, password });
+  document.getElementById("authMsg").textContent = r.error ? r.error.message : "Success! Logged in.";
+  if (!r.error) { hide("authModal"); load(); }
+}
+
+document.getElementById("logout").onclick = async () => { if (sb) await sb.auth.signOut(); localFollowCache.clear(); document.getElementById("profileText").textContent = "Not signed in."; load(); }
+
+// Publishing Video Controller Pipe Engine
