@@ -1,0 +1,5 @@
+FunTok branding
+The selected classy FunTok logo is included at:
+assets/funtok-logo.png
+
+The website header now uses this logo.
