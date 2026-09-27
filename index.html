@@ -111,7 +111,7 @@
 <button id="publish">Publish</button><p id="uploadMsg"></p></div></div>
 
 <!-- MODAL: TikTok Style Professional Profile Settings Panel Layout -->
-<div id="profileModal" class="modal"><div class="panel"><button class="close" onclick="hide('profileModal')">✕</button>
+<div id="profileModal" class="modal"><div class="panel" style="max-height: 85vh; overflow-y: auto;"><button class="close" onclick="hide('profileModal')">✕</button>
 <h2>Profile</h2>
 <div id="profile-card-layout" style="display: flex; flex-direction: column; align-items: center; gap: 12px; margin: 15px 0;">
   <img id="my-profile-avatar" src="assets/default-avatar.png" alt="Profile Picture" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #fe2c55; background: #222;">
@@ -121,6 +121,21 @@
     <span><strong id="stat-followers" style="color: #fff;">0</strong> Followers</span>
   </div>
 </div>
+
+<!-- NEW: Interactive Profile Customization Form Panel Fields -->
+<div id="profile-edit-fields-group" style="display: none; border-top: 1px solid #333; padding-top: 15px; margin-top: 10px; width: 100%; text-align: left;">
+  <h3 style="font-size: 14px; color: #fe2c55; margin-bottom: 10px;">Edit Profile Information</h3>
+  
+  <label style="font-size: 11px; color: #aaa; display: block; margin-bottom: 2px; padding-left: 4px;">Update Username:</label>
+  <input id="edit-username-input" type="text" placeholder="@new_handle" style="margin-bottom: 12px; width:100%;">
+  
+  <label style="font-size: 11px; color: #aaa; display: block; margin-bottom: 2px; padding-left: 4px;">Update Profile Pic URL:</label>
+  <input id="edit-avatar-url-input" type="url" placeholder="https://example.com" style="margin-bottom: 15px; width:100%;">
+  
+  <button id="save-profile-modifications-btn" style="background: #00a884; width: 100%; margin: 0; padding: 12px; font-weight: bold;">Save Changes</button>
+  <p id="profileUpdateMsg" style="text-align: center; margin-top: 8px; font-size: 12px;"></p>
+</div>
+
 <button id="authOpen">Sign in / Sign up</button><button id="logout">Log out</button></div></div>
 
 <!-- UPGRADED MODAL: Dynamic Content Moderation & Reporting Form -->
@@ -131,17 +146,3 @@
   <label style="padding: 10px; background: #16161a; border-radius: 8px; cursor: pointer; display: flex; gap: 10px; font-size: 13px;"><input type="radio" name="reportReason" value="Spam/Misleading" checked> Spam or Misleading</label>
   <label style="padding: 10px; background: #16161a; border-radius: 8px; cursor: pointer; display: flex; gap: 10px; font-size: 13px;"><input type="radio" name="reportReason" value="Inappropriate Content"> Inappropriate Content</label>
   <label style="padding: 10px; background: #16161a; border-radius: 8px; cursor: pointer; display: flex; gap: 10px; font-size: 13px;"><input type="radio" name="reportReason" value="Harassment/Bullying"> Harassment or Bullying</label>
-  <label style="padding: 10px; background: #16161a; border-radius: 8px; cursor: pointer; display: flex; gap: 10px; font-size: 13px;"><input type="radio" name="reportReason" value="Intellectual Property"> Intellectual Property Infringement</label>
-</div>
-<input type="hidden" id="reported-video-id">
-<button id="submit-report-btn" style="margin-top: 20px; background: #fe2c55; color: #fff; width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">Submit Report</button>
-<p id="reportMsg" style="text-align: center; margin-top: 8px; font-size: 12px;"></p>
-</div></div>
-
-</div>
-
-<script src="https://jsdelivr.net"></script>
-<script src="config.js"></script>
-<script src="app.js"></script>
-</body>
-</html>
