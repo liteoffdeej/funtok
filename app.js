@@ -191,7 +191,7 @@ async function executeVideoSearch() {
   
   resultsGrid.innerHTML = '';
   
-    // Resolve like configurations for search results items
+  // Resolve like configurations for search results items
   const processedSearchVideos = await Promise.all((matchedVideos || []).map(async vid => {
     const { count } = await sb.from('likes').select('*', { count: 'exact', head: true }).eq('video_id', vid.id);
     
@@ -216,7 +216,7 @@ async function executeVideoSearch() {
   // Render the processed search results into the search grid
   resultsGrid.innerHTML = processedSearchVideos.map(x => `
     <div class="search-result-item" style="position:relative; background:#111; border-radius:8px; overflow:hidden; aspect-ratio:9/16;">
-      ${x.video_url ? `<video src="\${esc(x.video_url)}" muted loop playsinline style="width:100%; height:100%; object-fit:cover;"></video>` : `<div style="display:flex; align-items:center; justify-content:center; height:100%; color:#555;">▶</div>`}
+      ${x.video_url ? `<video src="${esc(x.video_url)}" muted loop playsinline style="width:100%; height:100%; object-fit:cover;"></video>` : `<div style="display:flex; align-items:center; justify-content:center; height:100%; color:#555;">▶</div>`}
       <div style="position:absolute; bottom:0; left:0; right:0; padding:10px; background:linear-gradient(transparent, rgba(0,0,0,0.8)); color:#fff; font-size:12px;">
         <div style="font-weight:bold;">${esc(x.username)}</div>
         <div style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${esc(x.caption || "")}</div>
@@ -225,3 +225,12 @@ async function executeVideoSearch() {
   `).join("");
 }
 
+// Database-backed Relationship Follow/Unfollow Controller
+async function handleFollowToggle(targetUserId, buttonElement) {
+  if (!sb) {
+    alert("Database connection offline!");
+    return;
+  }
+
+  const currentSessionUser = sb.auth.user();
+  if (!currentSessionUser) {
