@@ -21,7 +21,44 @@
   <!-- The main video swipe panels will inject here dynamically via app.js -->
 </main>
 
-<!-- NEW: Embedded Search Engine Panel Framework -->
+<!-- EMBEDDED: Inbox / WhatsApp-Style Direct Messages Section -->
+<div id="inbox-view" class="view-panel" style="padding: 0; display: none; height: calc(100% - 65px); overflow: hidden; background: #000;">
+  <!-- Screen 1: Conversations List Grid -->
+  <div id="chats-list-screen" style="height: 100%; display: flex; flex-direction: column;">
+    <div style="padding: 60px 16px 16px 16px; border-bottom: 1px solid #222; background: #121212;">
+      <h2 style="font-weight: 900; font-size: 24px; color: #fff; margin: 0;">Chats</h2>
+    </div>
+    <div id="direct-chats-container" style="flex: 1; overflow-y: auto; padding: 8px 0;">
+      <!-- Dynamic WhatsApp-Style chat rows will populate here via app.js -->
+    </div>
+  </div>
+
+  <!-- Screen 2: Active Conversation Window (Hidden by Default) -->
+  <div id="active-chat-screen" style="height: 100%; display: none; flex-direction: column; background: #0b141a;">
+    <div style="padding: 50px 16px 12px 16px; background: #1f2c34; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #2d383e;">
+      <button id="back-to-chats-btn" style="background: none; border: none; color: #fff; font-size: 20px; cursor: pointer; padding: 0 4px;">←</button>
+      <img id="chat-header-avatar" src="assets/default-avatar.png" alt="" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; background: #333;">
+      <div>
+        <div id="chat-header-username" style="font-weight: bold; color: #fff; font-size: 15px;">Username</div>
+        <div style="font-size: 11px; color: #8696a0;">online</div>
+      </div>
+    </div>
+    
+    <!-- Bubble Stream Container -->
+    <div id="chat-messages-stream" style="flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 8px;">
+      <!-- Message bubbles populated here dynamically -->
+    </div>
+
+    <!-- WhatsApp Style Message Bar Controls -->
+    <div style="padding: 10px; background: #1f2c34; display: flex; align-items: center; gap: 8px;">
+      <input type="text" id="chat-message-input" placeholder="Type a message..." 
+             style="flex: 1; padding: 12px 16px; background: #2a3942; border: none; border-radius: 24px; color: #fff; font-size: 14px; outline: none;">
+      <button id="chat-send-btn" style="background: #00a884; border: none; width: 42px; height: 42px; border-radius: 50%; color: #fff; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center;">➔</button>
+    </div>
+  </div>
+</div>
+
+<!-- EMBEDDED: Search Engine Panel Framework -->
 <div id="search-view" class="view-panel" style="padding: 20px; display: none; height: calc(100% - 65px); overflow-y: auto;">
   <h2 style="margin-top: 60px; font-weight: 900; font-size: 26px; color: #fff;">Explore Channels</h2>
   
@@ -43,24 +80,64 @@
 <nav>
 <button class="active" data-page="home">⌂<span>Home</span></button>
 <button data-page="trending">🔥<span>Trending</span></button>
-<button id="uploadBtn" class="plus">＋</button>
+<button id="uploadBtn" class="plus" data-page="upload">＋</button>
 <!-- Cleaned up bottom nav search layout vector graphic -->
 <button data-page="search" id="navSearchBtn">
   <span class="search-icon-svg" style="transform: scale(0.8) rotate(-45deg); margin-bottom: 2px;"></span>
   <span>Search</span>
 </button>
-<button id="profileBtn">👤<span>Profile</span></button>
+<button data-page="inbox" id="navInboxBtn">
+  <span style="font-size: 18px; display: block; margin-bottom: 1px;">💬</span>
+  <span>Inbox</span>
+</button>
+<button id="profileBtn" data-page="profile">👤<span>Profile</span></button>
 </nav>
 
+<!-- MODAL: User Accounts Access Window -->
 <div id="authModal" class="modal"><div class="panel"><button class="close" onclick="hide('authModal')">✕</button>
-<h2>Welcome to FunTok</h2><input id="email" type="email" placeholder="Email"><input id="password" type="password" placeholder="Password">
+<h2>Welcome to FunTok</h2>
+<input id="email" type="email" placeholder="Email">
+<input id="password" type="password" placeholder="Password">
+<!-- Upgraded input parameters to support customized profile picture settings during sign-up -->
+<div style="margin-top: 6px; text-align: left; width: 100%;">
+  <label style="font-size: 11px; color: #aaa; display: block; margin-bottom: 4px; padding-left: 4px;">Optional Profile Picture Link:</label>
+  <input id="avatarUrl" type="url" placeholder="https://example.com" style="margin-top: 0;">
+</div>
 <div class="row"><button id="signup">Create account</button><button id="login">Log in</button></div><p id="authMsg"></p></div></div>
 
+<!-- MODAL: Video Uploader Actions -->
 <div id="uploadModal" class="modal"><div class="panel"><button class="close" onclick="hide('uploadModal')">✕</button>
 <h2>Upload a video</h2><input id="caption" maxlength="150" placeholder="Caption"><input id="videoFile" type="file" accept="video/mp4,video/webm,video/quicktime">
 <button id="publish">Publish</button><p id="uploadMsg"></p></div></div>
 
-<div id="profileModal" class="modal"><div class="panel"><button class="close" onclick="hide('profileModal')">✕</button><h2>Profile</h2><p id="profileText">Not signed in.</p><button id="authOpen">Sign in / Sign up</button><button id="logout">Log out</button></div></div>
+<!-- MODAL: TikTok Style Professional Profile Settings Panel Layout -->
+<div id="profileModal" class="modal"><div class="panel"><button class="close" onclick="hide('profileModal')">✕</button>
+<h2>Profile</h2>
+<div id="profile-card-layout" style="display: flex; flex-direction: column; align-items: center; gap: 12px; margin: 15px 0;">
+  <img id="my-profile-avatar" src="assets/default-avatar.png" alt="Profile Picture" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #fe2c55; background: #222;">
+  <p id="profileText" style="margin: 0; font-weight: bold; color: #fff;">Not signed in.</p>
+  <div id="profile-stats-counters" style="display: flex; gap: 24px; margin: 5px 0; color: #aaa; font-size: 13px;">
+    <span><strong id="stat-following" style="color: #fff;">0</strong> Following</span>
+    <span><strong id="stat-followers" style="color: #fff;">0</strong> Followers</span>
+  </div>
+</div>
+<button id="authOpen">Sign in / Sign up</button><button id="logout">Log out</button></div></div>
+
+<!-- UPGRADED MODAL: Dynamic Content Moderation & Reporting Form -->
+<div id="reportModal" class="modal"><div class="panel" style="max-width: 360px;"><button class="close" onclick="hide('reportModal')">✕</button>
+<h2 style="font-size: 18px; margin-bottom: 8px;">Report Video</h2>
+<p style="font-size: 12px; color: #aaa; margin-bottom: 16px;">Select the reason why you are flag-reporting this post content:</p>
+<div style="display: flex; flex-direction: column; gap: 8px; text-align: left;" id="report-reasons-group">
+  <label style="padding: 10px; background: #16161a; border-radius: 8px; cursor: pointer; display: flex; gap: 10px; font-size: 13px;"><input type="radio" name="reportReason" value="Spam/Misleading" checked> Spam or Misleading</label>
+  <label style="padding: 10px; background: #16161a; border-radius: 8px; cursor: pointer; display: flex; gap: 10px; font-size: 13px;"><input type="radio" name="reportReason" value="Inappropriate Content"> Inappropriate Content</label>
+  <label style="padding: 10px; background: #16161a; border-radius: 8px; cursor: pointer; display: flex; gap: 10px; font-size: 13px;"><input type="radio" name="reportReason" value="Harassment/Bullying"> Harassment or Bullying</label>
+  <label style="padding: 10px; background: #16161a; border-radius: 8px; cursor: pointer; display: flex; gap: 10px; font-size: 13px;"><input type="radio" name="reportReason" value="Intellectual Property"> Intellectual Property Infringement</label>
+</div>
+<input type="hidden" id="reported-video-id">
+<button id="submit-report-btn" style="margin-top: 20px; background: #fe2c55; color: #fff; width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">Submit Report</button>
+<p id="reportMsg" style="text-align: center; margin-top: 8px; font-size: 12px;"></p>
+</div></div>
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
