@@ -11,7 +11,10 @@
 <div id="app">
 <header>
   <a class="brand" href="#" aria-label="FunTok home"><img src="assets/funtok-logo.png" alt="FunTok"></a>
-  <button id="searchBtn">🔎</button>
+  <!-- Upgraded professional geometric search toggle button -->
+  <button id="searchBtn" class="premium-search-trigger" aria-label="Search Open">
+    <div class="search-icon-svg"></div>
+  </button>
 </header>
 
 <main id="feed" class="feed">
@@ -25,7 +28,10 @@
   <div class="search-bar-wrapper" style="display: flex; gap: 8px; margin-bottom: 20px;">
     <input type="text" id="search-input" placeholder="Search captions, tags, keywords..." 
            style="flex: 1; padding: 12px 16px; background: #16161a; border: 1px solid #333; border-radius: 12px; color: #fff; font-size: 14px; outline: none;">
-    <button id="search-btn" style="padding: 12px 18px; border: 0; background: #ff2d7a; color: #fff; font-weight: bold; border-radius: 12px; cursor: pointer;">🔍</button>
+    <!-- Cleaned up search action button text -->
+    <button id="search-btn" style="padding: 12px 18px; border: 0; background: #ff2d7a; color: #fff; font-weight: bold; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+      <div class="search-icon-svg" style="transform: scale(0.9) rotate(-45deg); margin: 0;"></div>
+    </button>
   </div>
 
   <!-- Real-time database lookup grid template target -->
@@ -38,7 +44,11 @@
 <button class="active" data-page="home">⌂<span>Home</span></button>
 <button data-page="trending">🔥<span>Trending</span></button>
 <button id="uploadBtn" class="plus">＋</button>
-<button data-page="search" id="navSearchBtn">🔍<span>Search</span></button>
+<!-- Cleaned up bottom nav search layout item -->
+<button data-page="search" id="navSearchBtn">
+  <div class="search-icon-svg" style="transform: scale(0.8) rotate(-45deg); margin-bottom: 2px;"></div>
+  <span>Search</span>
+</button>
 <button id="profileBtn">👤<span>Profile</span></button>
 </nav>
 

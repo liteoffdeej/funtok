@@ -79,6 +79,46 @@ header button {
   object-position: center;
 }
 
+/* --- Premium Minimalistic Search Trigger Style Box --- */
+.premium-search-trigger {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.premium-search-trigger:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+  transform: scale(1.05);
+}
+
+/* --- Vector Search Glass Layout Graphic Shape --- */
+.search-icon-svg {
+  width: 13px;
+  height: 13px;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  position: relative;
+  transform: rotate(-45deg);
+  display: inline-block;
+}
+.search-icon-svg::after {
+  content: "";
+  position: absolute;
+  width: 2px;
+  height: 6px;
+  background-color: #ffffff;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 1px;
+}
+
 /* --- Feed Architecture & Media Engine --- */
 .feed {
   height: 100%;
@@ -191,6 +231,20 @@ nav button {
 .plus {
   font-size: 28px !important;
   color: #ff2d7a !important;
+}
+
+/* --- Nav Search Specific Dynamic Active States --- */
+nav button:not(.active) .search-icon-svg {
+  border-color: #aaa;
+}
+nav button:not(.active) .search-icon-svg::after {
+  background-color: #aaa;
+}
+nav button.active .search-icon-svg {
+  border-color: #fff;
+}
+nav button.active .search-icon-svg::after {
+  background-color: #fff;
 }
 
 /* --- Popups and Application Modals --- */
