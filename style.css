@@ -91,10 +91,27 @@ header button {
   justify-content: center;
   transition: all 0.2s ease;
   cursor: pointer;
+  padding: 0 !important;   /* Clear potential browser button padding artifacts */
+  color: transparent;       /* Force hide any stuck textual emoji fallback data */
+  font-size: 0 !important;  /* Collapse default button font scales */
 }
 .premium-search-trigger:hover {
   background: rgba(255, 255, 255, 0.15) !important;
   transform: scale(1.05);
+}
+
+/* --- Inner Explore Panel Form Submit Action Button --- */
+.premium-search-submit {
+  padding: 12px 18px; 
+  border: 0; 
+  background: #ff2d7a; 
+  color: transparent; 
+  font-size: 0 !important;
+  border-radius: 12px; 
+  cursor: pointer; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
 }
 
 /* --- Vector Search Glass Layout Graphic Shape --- */
