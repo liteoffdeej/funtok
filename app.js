@@ -191,34 +191,37 @@ async function executeVideoSearch() {
   
   resultsGrid.innerHTML = '';
   
-  // Resolve like configurations for search results items
+    // Resolve like configurations for search results items
   const processedSearchVideos = await Promise.all((matchedVideos || []).map(async vid => {
     const { count } = await sb.from('likes').select('*', { count: 'exact', head: true }).eq('video_id', vid.id);
-    const currentSessionUser = sb.auth.user();
+    
     let userHasLiked = false;
+    const currentSessionUser = sb.auth.user();
     if (currentSessionUser) {
       const { data: existingLike } = await sb.from('likes').select('video_id').eq('user_id', currentSessionUser.id).eq('video_id', vid.id).maybeSingle();
       if (existingLike) userHasLiked = true;
     }
-    return { ...vid, likes_count: count || 0, has_liked: userHasLiked };
+
+    return {
+      id: vid.id,
+      user_id: vid.user_id,
+      username: vid.profiles?.username || "@user",
+      caption: vid.caption,
+      video_url: vid.video_url,
+      likes_count: count || 0,
+      has_liked: userHasLiked
+    };
   }));
 
-  processedSearchVideos.forEach(vid => {
-    const gridItem = document.createElement('div');
-    gridItem.style.cssText = "background:#121214; border-radius:12px; overflow:hidden; position:relative; height:200px; cursor:pointer; border:1px solid #222;";
-    gridItem.innerHTML = `
-      <video src="${vid.video_url}" style="width:100%; height:100%; object-fit:cover; pointer-events:none;"></video>
-      <div style="position:absolute; inset:0; background:linear-gradient(transparent 50%, rgba(0,0,0,0.9)); padding:8px; display:flex; flex-direction:column; justify-content:flex-end;">
-        <span style="font-size:11px; color:#ff2d7a; font-weight:800;">@${vid.profiles?.username || 'user'}</span>
-        <span style="font-size:12px; color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${vid.caption}</span>
+  // Render the processed search results into the search grid
+  resultsGrid.innerHTML = processedSearchVideos.map(x => `
+    <div class="search-result-item" style="position:relative; background:#111; border-radius:8px; overflow:hidden; aspect-ratio:9/16;">
+      ${x.video_url ? `<video src="\${esc(x.video_url)}" muted loop playsinline style="width:100%; height:100%; object-fit:cover;"></video>` : `<div style="display:flex; align-items:center; justify-content:center; height:100%; color:#555;">▶</div>`}
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:10px; background:linear-gradient(transparent, rgba(0,0,0,0.8)); color:#fff; font-size:12px;">
+        <div style="font-weight:bold;">${esc(x.username)}</div>
+        <div style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${esc(x.caption || "")}</div>
       </div>
-    `;
-    gridItem.onclick = () => {
-      // Direct Navigation Jumper: Switch tabs back to feed window view pane and isolate selected match card index context
-      searchView.style.display = "none";
-      feed.style.display = "block";
-      document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
-      document.querySelector('nav button[data-page="home"]').classList.add("active");
-      render([{ 
-        id: vid.id, 
-        user_id: vid.user_id, 
+    </div>
+  `).join("");
+}
+
