@@ -170,7 +170,7 @@ async function load() {
   }
 }
 
-// Navigation Tab Router Logic Control Engine (Fixed and Complete)
+// Navigation Tab Router Logic Control Engine
 document.querySelectorAll("nav button").forEach(btn => {
   btn.onclick = (e) => {
     const targetPage = btn.getAttribute("data-page");
@@ -211,6 +211,7 @@ document.getElementById("uploadBtn").onclick = () => { show("uploadModal"); };
 // Advanced Professional Interactive Search Panel Logic Control Framework
 async function executeVideoSearch() {
   const queryText = document.getElementById('search-input').value.trim().toLowerCase();
-  const resultsGrid = document.getElementById('search-results-grid');
+  const Glen = document.getElementById('search-results-grid');
   
   if (!queryText) {
+    Glen.innerHTML = demo.map(v => `
