@@ -5,9 +5,9 @@ const feed = document.getElementById("feed");
 const searchView = document.getElementById("search-view");
 
 const demo = [
- { username: "@funcreator", caption: "Welcome to FunTok! 🎉", video_url: "" },
- { username: "@funnyhub", caption: "When your friend says “I'm almost there” 😂", video_url: "" },
- { username: "@trendzone", caption: "New trends, new memories. ✨", video_url: "" }
+ { username: "@funcreator", caption: "Welcome to FunTok! 🎉", video_url: "", likes_count: 0, has_liked: false },
+ { username: "@funnyhub", caption: "When your friend says “I'm almost there” 😂", video_url: "", likes_count: 0, has_liked: false },
+ { username: "@trendzone", caption: "New trends, new memories. ✨", video_url: "", likes_count: 0, has_liked: false }
 ];
 
 // Cache map tracking user follow states locally to prevent unnecessary database queries
@@ -20,7 +20,7 @@ function esc(s) {
   return String(s).replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "'" }[m])); 
 }
 
-// Global Feed Rendering Engine (Enhanced with follow button hooks)
+// Global Feed Rendering Engine (Enhanced with follow and database-backed like buttons)
 function render(rows) {
   feed.innerHTML = rows.map((x) => {
     // Generate follow button UI state depending on session cache tracking matches
@@ -43,8 +43,8 @@ function render(rows) {
           <div class="caption">${esc(x.caption || "")}</div>
         </div>
         <div class="actions">
-          <button class="act" onclick="like(this)">♡</button>
-          <span class="num">0</span>
+          <button class="act" onclick="like(this)">${x.has_liked ? '♥' : '♡'}</button>
+          <span class="num">${x.likes_count || 0}</span>
           <button class="act" onclick="report()">⚑</button>
           <span class="num">Report</span>
           <button class="act" onclick="share()">↗</button>
@@ -54,11 +54,51 @@ function render(rows) {
   }).join("");
 }
 
-function like(b) { b.textContent = b.textContent === "♡" ? "♥" : "♡"; b.nextElementSibling.textContent = b.textContent === "♥" ? "1" : "0" }
+// Database-backed Live Liking Flow Logic Engine
+async function like(b) {
+  if (!sb) {
+    b.textContent = b.textContent === "♡" ? "♥" : "♡";
+    b.nextElementSibling.textContent = b.textContent === "♥" ? "1" : "0";
+    return;
+  }
+
+  const currentSessionUser = sb.auth.user();
+  if (!currentSessionUser) {
+    alert("Please sign into your creator account to like videos!");
+    return;
+  }
+
+  const cardElement = b.closest('.card');
+  const videoId = cardElement ? cardElement.getAttribute('data-video-id') : null;
+  if (!videoId) return;
+
+  const countSpan = b.nextElementSibling;
+
+  if (b.textContent === "♡") {
+    // Like Action: Insert into public.likes table
+    const { error } = await sb.from('likes').insert([{ user_id: currentSessionUser.id, video_id: videoId }]);
+    if (!error) {
+      b.textContent = "♥";
+      countSpan.textContent = parseInt(countSpan.textContent || 0) + 1;
+    } else {
+      console.error("Error liking video:", error.message);
+    }
+  } else {
+    // Unlike Action: Delete row record from public.likes table
+    const { error } = await sb.from('likes').delete().eq('user_id', currentSessionUser.id).eq('video_id', videoId);
+    if (!error) {
+      b.textContent = "♡";
+      countSpan.textContent = Math.max(0, parseInt(countSpan.textContent || 0) - 1);
+    } else {
+      console.error("Error unliking video:", error.message);
+    }
+  }
+}
+
 function share() { navigator.clipboard?.writeText(location.href); alert("FunTok link copied!") }
 function report() { alert("Report received. Thank you for making FunTok safe!") }
 
-// Fetching feeds from live servers and syncing relation caches simultaneously
+// Fetching feeds from live servers and syncing relation + like caches simultaneously
 async function load() {
   if (!sb) {
     render(demo);
@@ -79,13 +119,30 @@ async function load() {
     return;
   }
   
-  render((data || []).map(v => ({
-    id: v.id,
-    user_id: v.user_id,
-    username: v.profiles?.username || "@user",
-    caption: v.caption,
-    video_url: v.video_url
-  })));
+  // Transform data and pull real-time like counts
+  const processedVideos = await Promise.all((data || []).map(async v => {
+    // Query total row count for this video inside the likes table
+    const { count } = await sb.from('likes').select('*', { count: 'exact', head: true }).eq('video_id', v.id);
+    
+    // Check if the current user has liked this specific video layout card
+    let userHasLiked = false;
+    if (currentSessionUser) {
+      const { data: existingLike } = await sb.from('likes').select('video_id').eq('user_id', currentSessionUser.id).eq('video_id', v.id).maybeSingle();
+      if (existingLike) userHasLiked = true;
+    }
+
+    return {
+      id: v.id,
+      user_id: v.user_id,
+      username: v.profiles?.username || "@user",
+      caption: v.caption,
+      video_url: v.video_url,
+      likes_count: count || 0,
+      has_liked: userHasLiked
+    };
+  }));
+
+  render(processedVideos);
 }
 
 // Navigation Tab Router Logic Control Engine
@@ -133,7 +190,20 @@ async function executeVideoSearch() {
   }
   
   resultsGrid.innerHTML = '';
-  matchedVideos.forEach(vid => {
+  
+  // Resolve like configurations for search results items
+  const processedSearchVideos = await Promise.all((matchedVideos || []).map(async vid => {
+    const { count } = await sb.from('likes').select('*', { count: 'exact', head: true }).eq('video_id', vid.id);
+    const currentSessionUser = sb.auth.user();
+    let userHasLiked = false;
+    if (currentSessionUser) {
+      const { data: existingLike } = await sb.from('likes').select('video_id').eq('user_id', currentSessionUser.id).eq('video_id', vid.id).maybeSingle();
+      if (existingLike) userHasLiked = true;
+    }
+    return { ...vid, likes_count: count || 0, has_liked: userHasLiked };
+  }));
+
+  processedSearchVideos.forEach(vid => {
     const gridItem = document.createElement('div');
     gridItem.style.cssText = "background:#121214; border-radius:12px; overflow:hidden; position:relative; height:200px; cursor:pointer; border:1px solid #222;";
     gridItem.innerHTML = `
@@ -149,65 +219,6 @@ async function executeVideoSearch() {
       feed.style.display = "block";
       document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
       document.querySelector('nav button[data-page="home"]').classList.add("active");
-      render([{ id: vid.id, user_id: vid.user_id, username: vid.profiles?.username || "@user", caption: vid.caption, video_url: vid.video_url }]);
-    };
-    resultsGrid.appendChild(gridItem);
-  });
-}
-
-document.getElementById('search-btn').onclick = executeVideoSearch;
-document.getElementById('search-input').onkeydown = (e) => { if (e.key === 'Enter') executeVideoSearch(); };
-
-// Social Relations Management Engine Logic Tether
-async function handleFollowToggle(targetCreatorId, buttonElement) {
-  if (!sb) return;
-  const currentSessionUser = sb.auth.user();
-  if (!currentSessionUser) {
-    alert("Please sign into your creator account layout first to follow profiles!");
-    return;
-  }
-
-  if (localFollowCache.has(targetCreatorId)) {
-    // Unfollow Action Route
-    const { error } = await sb.from('follows').delete().eq('follower_id', currentSessionUser.id).eq('following_id', targetCreatorId);
-    if (!error) {
-      localFollowCache.delete(targetCreatorId);
-      buttonElement.innerText = "Follow";
-      buttonElement.style.background = "#ff2d7a";
-    }
-  } else {
-    // Follow Action Route
-    const { error } = await sb.from('follows').insert([{ follower_id: currentSessionUser.id, following_id: targetCreatorId }]);
-    if (!error) {
-      localFollowCache.add(targetCreatorId);
-      buttonElement.innerText = "Following";
-      buttonElement.style.background = "#333";
-    }
-  }
-}
-
-// Authentication Controller Interfaces Management Bindings
-document.getElementById("uploadBtn").onclick = () => { if (!sb) return alert("Add your Supabase settings in config.js first."); show("uploadModal") }
-document.getElementById("profileBtn").onclick = async () => {
-  show("profileModal");
-  if (sb) {
-    const { data } = await sb.auth.getUser();
-    document.getElementById("profileText").textContent = data.user ? `Signed in as ${data.user.email}` : "Not signed in."
-  }
-}
-document.getElementById("searchBtn").onclick = () => { document.querySelector('nav button[data-page="search"]').click(); }
-document.getElementById("authOpen").onclick = () => show("authModal")
-document.getElementById("signup").onclick = async () => auth(true)
-document.getElementById("login").onclick = async () => auth(false)
-
-async function auth(signup) {
-  if (!sb) return;
-  const email = document.getElementById("email").value, password = document.getElementById("password").value;
-  const r = signup ? await sb.auth.signUp({ email, password }) : await sb.auth.signInWithPassword({ email, password });
-  document.getElementById("authMsg").textContent = r.error ? r.error.message : "Success! Logged in.";
-  if (!r.error) { hide("authModal"); load(); }
-}
-
-document.getElementById("logout").onclick = async () => { if (sb) await sb.auth.signOut(); localFollowCache.clear(); document.getElementById("profileText").textContent = "Not signed in."; load(); }
-
-// Publishing Video Controller Pipe Engine
+      render([{ 
+        id: vid.id, 
+        user_id: vid.user_id, 
