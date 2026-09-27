@@ -170,7 +170,7 @@ async function load() {
   }
 }
 
-// Navigation Tab Router Logic Control Engine (Cleaned to fix responsive touch zones)
+// Navigation Tab Router Logic Control Engine (Fixed and Complete)
 document.querySelectorAll("nav button").forEach(btn => {
   btn.onclick = (e) => {
     const targetPage = btn.getAttribute("data-page");
