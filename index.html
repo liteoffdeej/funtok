@@ -45,7 +45,7 @@
       <!-- Video Live Feed Stream Panel View Container -->
       <div id="feed" class="feed"></div>
 
-      <!-- Professional Dynamic Grid Interactive Search Layout Panel Panel -->
+      <!-- Professional Dynamic Grid Interactive Search Layout Panel -->
       <div id="search-view" class="view-panel" style="display: none; padding: 24px;">
         <div class="search-header-box">
           <input type="text" id="search-input" placeholder="Search archive database keywords..." oninput="executeVideoSearch()">
@@ -93,6 +93,25 @@
       
       <div style="text-align: right; margin-top: 14px;">
         <button id="submit-report-btn">Submit Query</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TikTok-Style Interactive Floating Comments Overlay Drawer -->
+  <div id="commentsModal" class="modal">
+    <div class="panel comments-drawer">
+      <button id="close-comments-btn" class="close">✕</button>
+      <h3>Comments</h3>
+      
+      <input type="hidden" id="comments-video-id" value="">
+      
+      <!-- Scrollable Message Stream -->
+      <div id="comments-stream-container" class="comments-scroll-area"></div>
+      
+      <!-- Bottom Input Row Form -->
+      <div class="comments-footer-input-row">
+        <input type="text" id="new-comment-input-field" placeholder="Add a comment...">
+        <button id="submit-comment-btn">Post</button>
       </div>
     </div>
   </div>
