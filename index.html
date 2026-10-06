@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FunTok - Premium Platform</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>FunTok - Premium Responsive Platform</title>
   <link rel="stylesheet" href="style.css">
   <!-- Supabase CDN Client Dependency Link Wrapper -->
   <script src="https://jsdelivr.net"></script>
@@ -12,41 +12,43 @@
 
   <div id="app">
     
-    <!-- Left Navigation Sidebar Desktop Structural Alignment Frame -->
-    <nav>
+    <!-- Desktop Left Sidebar Navigation & Mobile Bottom Bar Dual-Mode Controller -->
+    <nav class="navigation-sidebar">
       <div class="logo-container">
         <span class="logo">Fun<b>Tok</b></span>
       </div>
       
-      <button data-page="home" class="active">
-        <span class="nav-icon">⌂</span> Home
-      </button>
-      <button data-page="trending">
-        <span class="nav-icon">🔥</span> Trending
-      </button>
-      <button data-page="search" id="navSearchBtn">
-        <span class="nav-icon">🔍</span> Search
-      </button>
-      <button data-page="inbox">
-        <span class="nav-icon">💬</span> Inbox
-      </button>
-      <button data-page="profile" id="profileBtn">
-        <span class="nav-icon">👤</span> Profile
-      </button>
+      <div class="nav-links-wrapper">
+        <button data-page="home" class="active">
+          <span class="nav-icon">⌂</span> <span class="nav-text">Home</span>
+        </button>
+        <button data-page="trending">
+          <span class="nav-icon">🔥</span> <span class="nav-text">Trending</span>
+        </button>
+        <button data-page="search" id="navSearchBtn">
+          <span class="nav-icon">🔍</span> <span class="nav-text">Search</span>
+        </button>
+        <button data-page="inbox">
+          <span class="nav-icon">💬</span> <span class="nav-text">Inbox</span>
+        </button>
+        <button data-page="profile" id="profileBtn">
+          <span class="nav-icon">👤</span> <span class="nav-text">Profile</span>
+        </button>
+      </div>
       
       <button id="uploadBtn" class="upload-sidebar-btn">
-        <span class="plus">＋</span> Upload Video
+        <span class="plus">＋</span> <span class="upload-btn-text">Upload Video</span>
       </button>
     </nav>
 
-    <!-- Main Content Stream Flow Engine -->
+    <!-- Main Content Dynamic Viewport Frame -->
     <main class="content-viewport">
       
       <!-- Video Live Feed Stream Panel View Container -->
       <div id="feed" class="feed"></div>
 
       <!-- Professional Dynamic Grid Interactive Search Layout Panel -->
-      <div id="search-view" class="view-panel" style="display: none; padding: 24px;">
+      <div id="search-view" class="view-panel" style="display: none;">
         <div class="search-header-box">
           <input type="text" id="search-input" placeholder="Search archive database keywords..." oninput="executeVideoSearch()">
         </div>
@@ -59,7 +61,7 @@
         <div id="chats-list-screen" style="width: 100%; display: flex; flex-direction: column;"></div>
         
         <!-- Active Dialog Workspace Content Overlay View Window -->
-        <div id="active-chat-screen" style="width: 100%; display: none; flex-direction: column; height: 100vh;">
+        <div id="active-chat-screen" style="width: 100%; display: none; flex-direction: column; height: 100%;">
           <div class="chat-header-banner">
             <button onclick="backToChatsList()" class="back-btn">← Back</button>
             <div id="chat-header-username" class="chat-title">@username</div>
@@ -83,10 +85,7 @@
       <h3>Report Post Content</h3>
       <p>Please clarify your query or issue with this post. Describe your concerns comprehensively below:</p>
       
-      <!-- Safe context identifier tracking target variable storage asset anchor -->
       <input type="hidden" id="reported-video-id" value="">
-      
-      <!-- Type Custom Reporting Statement Input Field Form Segment -->
       <textarea id="custom-report-text" placeholder="Type your dynamic report query here..."></textarea>
       
       <div id="reportMsg" style="margin: 8px 0; font-size: 13px; font-weight: bold;"></div>
@@ -104,11 +103,8 @@
       <h3>Comments</h3>
       
       <input type="hidden" id="comments-video-id" value="">
-      
-      <!-- Scrollable Message Stream -->
       <div id="comments-stream-container" class="comments-scroll-area"></div>
       
-      <!-- Bottom Input Row Form -->
       <div class="comments-footer-input-row">
         <input type="text" id="new-comment-input-field" placeholder="Add a comment...">
         <button id="submit-comment-btn">Post</button>
@@ -141,7 +137,6 @@
     </div>
   </div>
 
-  <!-- App Core JavaScript Engine Scripts Loader -->
   <script src="app.js"></script>
 </body>
 </html>
