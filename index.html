@@ -1,148 +1,128 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="FunTok - short videos and fun moments">
-<title>FunTok</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FunTok - Premium Platform</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Supabase CDN Client Dependency Link Wrapper -->
+  <script src="https://jsdelivr.net"></script>
 </head>
 <body>
-<div id="app">
-<header>
-  <a class="brand" href="#" aria-label="FunTok home"><img src="assets/funtok-logo.png" alt="FunTok"></a>
-  <!-- Cleaned native structural container for top search vector -->
-  <button id="searchBtn" class="premium-search-trigger" aria-label="Search Open">
-    <span class="search-icon-svg"></span>
-  </button>
-</header>
 
-<main id="feed" class="feed">
-  <!-- The main video swipe panels will inject here dynamically via app.js -->
-</main>
+  <div id="app">
+    
+    <!-- Left Navigation Sidebar Desktop Structural Alignment Frame -->
+    <nav>
+      <div class="logo-container">
+        <span class="logo">Fun<b>Tok</b></span>
+      </div>
+      
+      <button data-page="home" class="active">
+        <span class="nav-icon">⌂</span> Home
+      </button>
+      <button data-page="trending">
+        <span class="nav-icon">🔥</span> Trending
+      </button>
+      <button data-page="search" id="navSearchBtn">
+        <span class="nav-icon">🔍</span> Search
+      </button>
+      <button data-page="inbox">
+        <span class="nav-icon">💬</span> Inbox
+      </button>
+      <button data-page="profile" id="profileBtn">
+        <span class="nav-icon">👤</span> Profile
+      </button>
+      
+      <button id="uploadBtn" class="upload-sidebar-btn">
+        <span class="plus">＋</span> Upload Video
+      </button>
+    </nav>
 
-<!-- EMBEDDED: Inbox / WhatsApp-Style Direct Messages Section -->
-<div id="inbox-view" class="view-panel" style="padding: 0; display: none; height: calc(100% - 65px); overflow: hidden; background: #000;">
-  <!-- Screen 1: Conversations List Grid -->
-  <div id="chats-list-screen" style="height: 100%; display: flex; flex-direction: column;">
-    <div style="padding: 60px 16px 16px 16px; border-bottom: 1px solid #222; background: #121212;">
-      <h2 style="font-weight: 900; font-size: 24px; color: #fff; margin: 0;">Chats</h2>
-    </div>
-    <div id="direct-chats-container" style="flex: 1; overflow-y: auto; padding: 8px 0;">
-      <!-- Dynamic WhatsApp-Style chat rows will populate here via app.js -->
-    </div>
+    <!-- Main Content Stream Flow Engine -->
+    <main class="content-viewport">
+      
+      <!-- Video Live Feed Stream Panel View Container -->
+      <div id="feed" class="feed"></div>
+
+      <!-- Professional Dynamic Grid Interactive Search Layout Panel Panel -->
+      <div id="search-view" class="view-panel" style="display: none; padding: 24px;">
+        <div class="search-header-box">
+          <input type="text" id="search-input" placeholder="Search archive database keywords..." oninput="executeVideoSearch()">
+        </div>
+        <div id="search-results-grid" class="search-grid-layout"></div>
+      </div>
+
+      <!-- Conversational Interaction Screen Messaging Center Layout Wrapper -->
+      <div id="inbox-view" class="view-panel" style="display: none;">
+        <!-- WhatsApp Architecture Thread Container Frame -->
+        <div id="chats-list-screen" style="width: 100%; display: flex; flex-direction: column;"></div>
+        
+        <!-- Active Dialog Workspace Content Overlay View Window -->
+        <div id="active-chat-screen" style="width: 100%; display: none; flex-direction: column; height: 100vh;">
+          <div class="chat-header-banner">
+            <button onclick="backToChatsList()" class="back-btn">← Back</button>
+            <div id="chat-header-username" class="chat-title">@username</div>
+          </div>
+          <div id="chat-conversation-stream" class="chat-bubbles-stream"></div>
+          <div class="chat-input-bar">
+            <input type="text" id="chat-reply-input" placeholder="Type a message...">
+            <button onclick="sendLiveChatMessage()">Send</button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
   </div>
 
-  <!-- Screen 2: Active Conversation Window (Hidden by Default) -->
-  <div id="active-chat-screen" style="height: 100%; display: none; flex-direction: column; background: #0b141a;">
-    <div style="padding: 50px 16px 12px 16px; background: #1f2c34; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #2d383e;">
-      <button id="back-to-chats-btn" style="background: none; border: none; color: #fff; font-size: 20px; cursor: pointer; padding: 0 4px;">←</button>
-      <img id="chat-header-avatar" src="assets/default-avatar.png" alt="" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; background: #333;">
-      <div>
-        <div id="chat-header-username" style="font-weight: bold; color: #fff; font-size: 15px;">Username</div>
-        <div style="font-size: 11px; color: #8696a0;">online</div>
+  <!-- Interactive Custom Text Inquiry Reporting Wizard Modal Structure Overlay -->
+  <div id="reportModal" class="modal">
+    <div class="panel">
+      <button id="close-report-btn" class="close">✕</button>
+      <h3>Report Post Content</h3>
+      <p>Please clarify your query or issue with this post. Describe your concerns comprehensively below:</p>
+      
+      <!-- Safe context identifier tracking target variable storage asset anchor -->
+      <input type="hidden" id="reported-video-id" value="">
+      
+      <!-- Type Custom Reporting Statement Input Field Form Segment -->
+      <textarea id="custom-report-text" placeholder="Type your dynamic report query here..."></textarea>
+      
+      <div id="reportMsg" style="margin: 8px 0; font-size: 13px; font-weight: bold;"></div>
+      
+      <div style="text-align: right; margin-top: 14px;">
+        <button id="submit-report-btn">Submit Query</button>
       </div>
     </div>
-    
-    <!-- Bubble Stream Container -->
-    <div id="chat-messages-stream" style="flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 8px;">
-      <!-- Message bubbles populated here dynamically -->
+  </div>
+
+  <!-- Profile Configuration Setup Modal Layer -->
+  <div id="profileModal" class="modal">
+    <div class="panel">
+      <button onclick="hide('profileModal')" class="close">✕</button>
+      <h3>User Profile Panel</h3>
+      <div id="profile-stats-display" style="margin: 12px 0; color: #aaa;"></div>
+      <div class="row-input-group">
+        <input type="text" id="update-username-field" placeholder="New Username">
+        <input type="text" id="update-avatar-field" placeholder="Avatar Image Link URL">
+      </div>
+      <button onclick="saveUserProfileSettings()">Save Changes</button>
     </div>
+  </div>
 
-    <!-- WhatsApp Style Message Bar Controls -->
-    <div style="padding: 10px; background: #1f2c34; display: flex; align-items: center; gap: 8px;">
-      <input type="text" id="chat-message-input" placeholder="Type a message..." 
-             style="flex: 1; padding: 12px 16px; background: #2a3942; border: none; border-radius: 24px; color: #fff; font-size: 14px; outline: none;">
-      <button id="chat-send-btn" style="background: #00a884; border: none; width: 42px; height: 42px; border-radius: 50%; color: #fff; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center;">➔</button>
+  <!-- Upload Form Interface Interaction Framework Panel Overlay -->
+  <div id="uploadModal" class="modal">
+    <div class="panel">
+      <button onclick="hide('uploadModal')" class="close">✕</button>
+      <h3>Publish Video Snippet</h3>
+      <input type="text" id="upload-caption" placeholder="Write video caption text...">
+      <input type="text" id="upload-video-url" placeholder="Paste direct .mp4 online stream storage link asset url...">
+      <button onclick="submitNewUploadedVideo()">Publish Post</button>
     </div>
   </div>
-</div>
 
-<!-- EMBEDDED: Search Engine Panel Framework -->
-<div id="search-view" class="view-panel" style="padding: 20px; display: none; height: calc(100% - 65px); overflow-y: auto;">
-  <h2 style="margin-top: 60px; font-weight: 900; font-size: 26px; color: #fff;">Explore Channels</h2>
-  
-  <div class="search-bar-wrapper" style="display: flex; gap: 8px; margin-bottom: 20px;">
-    <input type="text" id="search-input" placeholder="Search captions, tags, keywords..." 
-           style="flex: 1; padding: 12px 16px; background: #16161a; border: 1px solid #333; border-radius: 12px; color: #fff; font-size: 14px; outline: none;">
-    <!-- Upgraded search form trigger without text fallback vectors -->
-    <button id="search-btn" class="premium-search-submit" aria-label="Submit Search">
-      <span class="search-icon-svg" style="transform: scale(0.9) rotate(-45deg); display: block;"></span>
-    </button>
-  </div>
-
-  <!-- Real-time database lookup grid template target -->
-  <div id="search-results-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding-bottom: 40px;">
-    <p class="search-notice" style="color: #666; grid-column: span 2; text-align: center; margin-top: 40px;">Type a phrase above to scan database archives...</p>
-  </div>
-</div>
-
-<nav>
-<button class="active" data-page="home">⌂<span>Home</span></button>
-<button data-page="trending">🔥<span>Trending</span></button>
-<button id="uploadBtn" class="plus" data-page="upload">＋</button>
-<!-- Cleaned up bottom nav search layout vector graphic -->
-<button data-page="search" id="navSearchBtn">
-  <span class="search-icon-svg" style="transform: scale(0.8) rotate(-45deg); margin-bottom: 2px;"></span>
-  <span>Search</span>
-</button>
-<button data-page="inbox" id="navInboxBtn">
-  <span style="font-size: 18px; display: block; margin-bottom: 1px;">💬</span>
-  <span>Inbox</span>
-</button>
-<button id="profileBtn" data-page="profile">👤<span>Profile</span></button>
-</nav>
-
-<!-- MODAL: User Accounts Access Window -->
-<div id="authModal" class="modal"><div class="panel"><button class="close" onclick="hide('authModal')">✕</button>
-<h2>Welcome to FunTok</h2>
-<input id="email" type="email" placeholder="Email">
-<input id="password" type="password" placeholder="Password">
-<!-- Upgraded input parameters to support customized profile picture settings during sign-up -->
-<div style="margin-top: 6px; text-align: left; width: 100%;">
-  <label style="font-size: 11px; color: #aaa; display: block; margin-bottom: 4px; padding-left: 4px;">Optional Profile Picture Link:</label>
-  <input id="avatarUrl" type="url" placeholder="https://example.com" style="margin-top: 0;">
-</div>
-<div class="row"><button id="signup">Create account</button><button id="login">Log in</button></div><p id="authMsg"></p></div></div>
-
-<!-- MODAL: Video Uploader Actions -->
-<div id="uploadModal" class="modal"><div class="panel"><button class="close" onclick="hide('uploadModal')">✕</button>
-<h2>Upload a video</h2><input id="caption" maxlength="150" placeholder="Caption"><input id="videoFile" type="file" accept="video/mp4,video/webm,video/quicktime">
-<button id="publish">Publish</button><p id="uploadMsg"></p></div></div>
-
-<!-- MODAL: TikTok Style Professional Profile Settings Panel Layout -->
-<div id="profileModal" class="modal"><div class="panel" style="max-height: 85vh; overflow-y: auto;"><button class="close" onclick="hide('profileModal')">✕</button>
-<h2>Profile</h2>
-<div id="profile-card-layout" style="display: flex; flex-direction: column; align-items: center; gap: 12px; margin: 15px 0;">
-  <img id="my-profile-avatar" src="assets/default-avatar.png" alt="Profile Picture" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #fe2c55; background: #222;">
-  <p id="profileText" style="margin: 0; font-weight: bold; color: #fff;">Not signed in.</p>
-  <div id="profile-stats-counters" style="display: flex; gap: 24px; margin: 5px 0; color: #aaa; font-size: 13px;">
-    <span><strong id="stat-following" style="color: #fff;">0</strong> Following</span>
-    <span><strong id="stat-followers" style="color: #fff;">0</strong> Followers</span>
-  </div>
-</div>
-
-<!-- NEW: Interactive Profile Customization Form Panel Fields -->
-<div id="profile-edit-fields-group" style="display: none; border-top: 1px solid #333; padding-top: 15px; margin-top: 10px; width: 100%; text-align: left;">
-  <h3 style="font-size: 14px; color: #fe2c55; margin-bottom: 10px;">Edit Profile Information</h3>
-  
-  <label style="font-size: 11px; color: #aaa; display: block; margin-bottom: 2px; padding-left: 4px;">Update Username:</label>
-  <input id="edit-username-input" type="text" placeholder="@new_handle" style="margin-bottom: 12px; width:100%;">
-  
-  <label style="font-size: 11px; color: #aaa; display: block; margin-bottom: 2px; padding-left: 4px;">Update Profile Pic URL:</label>
-  <input id="edit-avatar-url-input" type="url" placeholder="https://example.com" style="margin-bottom: 15px; width:100%;">
-  
-  <button id="save-profile-modifications-btn" style="background: #00a884; width: 100%; margin: 0; padding: 12px; font-weight: bold;">Save Changes</button>
-  <p id="profileUpdateMsg" style="text-align: center; margin-top: 8px; font-size: 12px;"></p>
-</div>
-
-<button id="authOpen">Sign in / Sign up</button><button id="logout">Log out</button></div></div>
-
-<!-- UPGRADED MODAL: Dynamic Content Moderation & Reporting Form -->
-<div id="reportModal" class="modal"><div class="panel" style="max-width: 360px;"><button class="close" onclick="hide('reportModal')">✕</button>
-<h2 style="font-size: 18px; margin-bottom: 8px;">Report Video</h2>
-<p style="font-size: 12px; color: #aaa; margin-bottom: 16px;">Select the reason why you are flag-reporting this post content:</p>
-<div style="display: flex; flex-direction: column; gap: 8px; text-align: left;" id="report-reasons-group">
-  <label style="padding: 10px; background: #16161a; border-radius: 8px; cursor: pointer; display: flex; gap: 10px; font-size: 13px;"><input type="radio" name="reportReason" value="Spam/Misleading" checked> Spam or Misleading</label>
-  <label style="padding: 10px; background: #16161a; border-radius: 8px; cursor: pointer; display: flex; gap: 10px; font-size: 13px;"><input type="radio" name="reportReason" value="Inappropriate Content"> Inappropriate Content</label>
-  <label style="padding: 10px; background: #16161a; border-radius: 8px; cursor: pointer; display: flex; gap: 10px; font-size: 13px;"><input type="radio" name="reportReason" value="Harassment/Bullying"> Harassment or Bullying</label>
+  <!-- App Core JavaScript Engine Scripts Loader -->
+  <script src="app.js"></script>
+</body>
+</html>
