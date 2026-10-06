@@ -1,476 +1,128 @@
-/* --- Core Resets and Document Layout --- */
-* {
-  box-sizing: border-box;
-}
-html, body {
-  margin: 0;
-  padding: 0;
-  background-color: #0b0b0f; /* Premium dark background behind the phone framework viewport */
-  color: #fff;
-  font-family: Arial, sans-serif;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-}
-.app {
-  max-width: 520px;
-  margin: auto;
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FunTok - Premium Platform</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Supabase CDN Client Dependency Link Wrapper -->
+  <script src="https://jsdelivr.net"></script>
+</head>
+<body>
 
-/* --- Mobile View Container Frame (Centering & Structure) --- */
-#app {
-  width: 100%;
-  max-width: 450px; /* Perfect desktop phone aspect ratio window size width */
-  height: 100vh;
-  max-height: 850px; /* Looks like an iPhone/Android screen frame */
-  position: relative;
-  overflow: hidden;
-  background: #111;
-  border-radius: 24px; /* Gives the layout soft, modern rounded phone corners */
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
-  border: 4px solid #1a1a24; /* Subtle dark metallic outline framing */
-}
+  <div id="app">
+    
+    <!-- Left Navigation Sidebar Desktop Structural Alignment Frame -->
+    <nav>
+      <div class="logo-container">
+        <span class="logo">Fun<b>Tok</b></span>
+      </div>
+      
+      <button data-page="home" class="active">
+        <span class="nav-icon">⌂</span> Home
+      </button>
+      <button data-page="trending">
+        <span class="nav-icon">🔥</span> Trending
+      </button>
+      <button data-page="search" id="navSearchBtn">
+        <span class="nav-icon">🔍</span> Search
+      </button>
+      <button data-page="inbox">
+        <span class="nav-icon">💬</span> Inbox
+      </button>
+      <button data-page="profile" id="profileBtn">
+        <span class="nav-icon">👤</span> Profile
+      </button>
+      
+      <button id="uploadBtn" class="upload-sidebar-btn">
+        <span class="plus">＋</span> Upload Video
+      </button>
+    </nav>
 
-/* --- Premium Top Header & Logo Layout Fix --- */
-header {
-  position: absolute;
-  z-index: 15; /* Sits safely on top of structural layout cards */
-  top: 0;
-  left: 0;
-  right: 0;
-  padding: 16px 18px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 70%, rgba(0,0,0,0) 100%);
-  backdrop-filter: blur(4px); /* Adds a premium modern frosted-glass effect behind the text */
-  -webkit-backdrop-filter: blur(4px);
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
-}
-header button {
-  background: none;
-  border: 0;
-  color: #fff;
-  font-size: 21px;
-  cursor: pointer;
-}
-.logo {
-  font-size: 25px;
-  font-weight: 900;
-}
-.logo b {
-  color: #ff2d7a;
-}
+    <!-- Main Content Stream Flow Engine -->
+    <main class="content-viewport">
+      
+      <!-- Video Live Feed Stream Panel View Container -->
+      <div id="feed" class="feed"></div>
 
-/* --- Upgraded Premium Branding Layout Fix --- */
-.brand {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 110px;
-  height: 40px;
-  overflow: hidden;
-  border-radius: 8px;
-  /* Premium dark frosted-glass container background */
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 6px;
-  transition: all 0.3s ease;
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
-  text-decoration: none;
-}
-.brand:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.2);
-  transform: translateY(-1px);
-}
-.brand img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain; /* Keeps logo proportions perfect without distortion */
-  object-position: center;
-  /* Adds a subtle premium drop shadow to the brand graphic itself */
-  filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.5));
-}
+      <!-- Professional Dynamic Grid Interactive Search Layout Panel Panel -->
+      <div id="search-view" class="view-panel" style="display: none; padding: 24px;">
+        <div class="search-header-box">
+          <input type="text" id="search-input" placeholder="Search archive database keywords..." oninput="executeVideoSearch()">
+        </div>
+        <div id="search-results-grid" class="search-grid-layout"></div>
+      </div>
 
-/* --- Premium Minimalistic Search Trigger Style Box --- */
-.premium-search-trigger {
-  background: rgba(255, 255, 255, 0.08) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  cursor: pointer;
-  padding: 0 !important;   /* Clear potential browser button padding artifacts */
-  color: transparent;       /* Force hide any stuck textual emoji fallback data */
-  font-size: 0 !important;  /* Collapse default button font scales */
-}
-.premium-search-trigger:hover {
-  background: rgba(255, 255, 255, 0.15) !important;
-  transform: scale(1.05);
-}
+      <!-- Conversational Interaction Screen Messaging Center Layout Wrapper -->
+      <div id="inbox-view" class="view-panel" style="display: none;">
+        <!-- WhatsApp Architecture Thread Container Frame -->
+        <div id="chats-list-screen" style="width: 100%; display: flex; flex-direction: column;"></div>
+        
+        <!-- Active Dialog Workspace Content Overlay View Window -->
+        <div id="active-chat-screen" style="width: 100%; display: none; flex-direction: column; height: 100vh;">
+          <div class="chat-header-banner">
+            <button onclick="backToChatsList()" class="back-btn">← Back</button>
+            <div id="chat-header-username" class="chat-title">@username</div>
+          </div>
+          <div id="chat-conversation-stream" class="chat-bubbles-stream"></div>
+          <div class="chat-input-bar">
+            <input type="text" id="chat-reply-input" placeholder="Type a message...">
+            <button onclick="sendLiveChatMessage()">Send</button>
+          </div>
+        </div>
+      </div>
 
-/* --- Inner Explore Panel Form Submit Action Button --- */
-.premium-search-submit {
-  padding: 12px 18px; 
-  border: 0; 
-  background: #ff2d7a; 
-  color: transparent; 
-  font-size: 0 !important;
-  border-radius: 12px; 
-  cursor: pointer; 
-  display: flex; 
-  align-items: center; 
-  justify-content: center;
-}
+    </main>
 
-/* --- Vector Search Glass Layout Graphic Shape --- */
-.search-icon-svg {
-  width: 13px;
-  height: 13px;
-  border: 2px solid #ffffff;
-  border-radius: 50%;
-  position: relative;
-  transform: rotate(-45deg);
-  display: inline-block;
-}
-.search-icon-svg::after {
-  content: "";
-  position: absolute;
-  width: 2px;
-  height: 6px;
-  background-color: #ffffff;
-  bottom: -6px;
-  left: 50%;
-  transform: translateX(-50%);
-  border-radius: 1px;
-}
+  </div>
 
-/* --- Feed Architecture & Media Engine --- */
-.feed {
-  height: 100%;
-  overflow-y: auto;
-  scroll-snap-type: y mandatory;
-  scrollbar-width: none;
-}
-.feed::-webkit-scrollbar {
-  display: none;
-}
-.card {
-  height: 100vh;
-  min-height: 600px;
-  scroll-snap-align: start;
-  position: relative;
-  background: #181818;
-}
-.card video, video {
-  width: 100%;
-  height: 100%;
-  object-fit: contain; /* Prevents video element distortion or edge-cropping on desktop overrides */
-  background-color: #000;
-}
-.fallback {
-  height: 100%;
-  display: grid;
-  place-items: center;
-  font-size: 64px;
-}
-.shade {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(transparent 45%, #000d);
-  z-index: 1;
-}
+  <!-- Interactive Custom Text Inquiry Reporting Wizard Modal Structure Overlay -->
+  <div id="reportModal" class="modal">
+    <div class="panel">
+      <button id="close-report-btn" class="close">✕</button>
+      <h3>Report Post Content</h3>
+      <p>Please clarify your query or issue with this post. Describe your concerns comprehensively below:</p>
+      
+      <!-- Safe context identifier tracking target variable storage asset anchor -->
+      <input type="hidden" id="reported-video-id" value="">
+      
+      <!-- Type Custom Reporting Statement Input Field Form Segment -->
+      <textarea id="custom-report-text" placeholder="Type your dynamic report query here..."></textarea>
+      
+      <div id="reportMsg" style="margin: 8px 0; font-size: 13px; font-weight: bold;"></div>
+      
+      <div style="text-align: right; margin-top: 14px;">
+        <button id="submit-report-btn">Submit Query</button>
+      </div>
+    </div>
+  </div>
 
-/* --- Search Engine View Panel Framework Layout --- */
-.view-panel {
-  width: 100%;
-  background: #111;
-  position: relative;
-  z-index: 5;
-}
-.view-panel::-webkit-scrollbar {
-  display: none;
-}
+  <!-- Profile Configuration Setup Modal Layer -->
+  <div id="profileModal" class="modal">
+    <div class="panel">
+      <button onclick="hide('profileModal')" class="close">✕</button>
+      <h3>User Profile Panel</h3>
+      <div id="profile-stats-display" style="margin: 12px 0; color: #aaa;"></div>
+      <div class="row-input-group">
+        <input type="text" id="update-username-field" placeholder="New Username">
+        <input type="text" id="update-avatar-field" placeholder="Avatar Image Link URL">
+      </div>
+      <button onclick="saveUserProfileSettings()">Save Changes</button>
+    </div>
+  </div>
 
-/* --- Layout Interface Content Overlays --- */
-.info {
-  position: absolute;
-  left: 16px;
-  right: 85px;
-  bottom: 78px;
-  z-index: 2;
-  text-shadow: 0 2px 5px #000;
-}
-.user {
-  font-weight: 800;
-  font-size: 18px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.caption {
-  margin-top: 7px;
-}
-.actions {
-  position: absolute;
-  right: 12px;
-  bottom: 105px;
-  z-index: 3;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-}
-.act {
-  border: 0;
-  background: #0009;
-  color: #fff;
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  font-size: 22px;
-  cursor: pointer;
-}
-.num {
-  font-size: 12px;
-  margin-bottom: 8px;
-}
+  <!-- Upload Form Interface Interaction Framework Panel Overlay -->
+  <div id="uploadModal" class="modal">
+    <div class="panel">
+      <button onclick="hide('uploadModal')" class="close">✕</button>
+      <h3>Publish Video Snippet</h3>
+      <input type="text" id="upload-caption" placeholder="Write video caption text...">
+      <input type="text" id="upload-video-url" placeholder="Paste direct .mp4 online stream storage link asset url...">
+      <button onclick="submitNewUploadedVideo()">Publish Post</button>
+    </div>
+  </div>
 
-/* --- NEW: TikTok Style Feed Avatar Stack with Integrated Follow Badge --- */
-.feed-avatar-container {
-  position: relative;
-  width: 48px;
-  height: 48px;
-  margin-bottom: 12px;
-}
-.feed-avatar-img {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid #fff;
-  background: #222;
-}
-.follow-badge {
-  position: absolute;
-  bottom: -5px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #fe2c55;
-  color: #fff;
-  border: none;
-  border-radius: 50%;
-  width: 20px;
-  height: 20px;
-  font-size: 12px;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-  transition: all 0.2s ease;
-  padding: 0;
-}
-.follow-badge.following {
-  background: #00a884;
-  transform: translateX(-50%) rotate(45deg);
-}
-
-/* --- Navigation System Bar --- */
-nav, .bottom-nav, footer {
-  position: absolute !important;
-  z-index: 18;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 65px;
-  background: #080808f2;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  width: 100% !important;
-  max-width: 450px;
-  margin: 0 auto;
-  border-bottom-left-radius: 20px;
-  border-bottom-right-radius: 20px;
-}
-nav button {
-  border: 0;
-  background: none;
-  color: #aaa;
-  font-size: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  align-items: center;
-  cursor: pointer;
-  flex: 1;
-  padding: 8px 0;
-  height: 100%;
-  justify-content: center;
-}
-.active {
-  color: #fff !important;
-}
-.plus {
-  font-size: 28px !important;
-  color: #ff2d7a !important;
-}
-
-/* --- Nav Search Specific Dynamic Active States --- */
-nav button:not(.active) .search-icon-svg {
-  border-color: #aaa;
-}
-nav button:not(.active) .search-icon-svg::after {
-  background-color: #aaa;
-}
-nav button.active .search-icon-svg {
-  border-color: #fff;
-}
-nav button.active .search-icon-svg::after {
-  background-color: #fff;
-}
-
-/* --- NEW: WhatsApp-Style Messaging Views Architecture --- */
-.chat-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  border-bottom: 1px solid #16161a;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-.chat-row:hover {
-  background: #16161a;
-}
-.chat-row-details {
-  flex: 1;
-}
-.chat-row-meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.chat-row-username {
-  font-weight: bold;
-  color: #fff;
-  font-size: 15px;
-}
-.chat-row-time {
-  font-size: 11px;
-  color: #8696a0;
-}
-.chat-row-snippet {
-  font-size: 13px;
-  color: #8696a0;
-  margin-top: 3px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 280px;
-}
-
-/* WhatsApp Style Conversational Chat Bubbles */
-.bubble {
-  max-width: 75%;
-  padding: 8px 12px;
-  border-radius: 8px;
-  font-size: 14px;
-  line-height: 1.4;
-  position: relative;
-  word-wrap: break-word;
-  box-shadow: 0 1px 1px rgba(0,0,0,0.2);
-}
-.bubble.received {
-  background: #202c33;
-  color: #e9edef;
-  align-self: flex-start;
-  border-top-left-radius: 0;
-}
-.bubble.sent {
-  background: #005c4b;
-  color: #e9edef;
-  align-self: flex-end;
-  border-top-right-radius: 0;
-}
-.bubble-time {
-  font-size: 9px;
-  color: #8696a0;
-  text-align: right;
-  margin-top: 4px;
-  display: block;
-}
-
-/* --- Popups and Application Modals --- */
-.modal {
-  position: absolute;
-  z-index: 25;
-  inset: 0;
-  background: #000c;
-  display: none;
-  align-items: flex-end;
-}
-.panel {
-  width: 100%;
-  background: #171717;
-  border-radius: 22px 22px 0 0;
-  padding: 20px;
-  box-shadow: 0 -8px 24px rgba(0,0,0,0.5);
-}
-.panel input {
-  width: 100%;
-  padding: 12px;
-  margin: 7px 0;
-  background: #0c0c0c;
-  border: 1px solid #444;
-  border-radius: 10px;
-  color: #fff;
-}
-.panel button {
-  padding: 12px 16px;
-  border: 0;
-  border-radius: 10px;
-  background: #ff2d7a;
-  color: #fff;
-  font-weight: bold;
-  margin: 5px;
-  cursor: pointer;
-}
-.close {
-  float: right;
-  background: #333 !important;
-}
-.row {
-  display: flex;
-  gap: 8px;
-}
-.panel p {
-  color: #aaa;
-}
-
-/* --- Custom Grid View Styling for Professional Search Results --- */
-.search-grid-item {
-  position: relative;
-  aspect-ratio: 9 / 16;
-  background: #16161a;
-  border-radius: 8px;
-  overflow: hidden;
-  cursor: pointer;
-  border: 1px solid #222;
-}
-.search-grid-item video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.search-grid-meta {
-
+  <!-- App Core JavaScript Engine Scripts Loader -->
+  <script src="app.js"></script>
+</body>
+</html>
