@@ -11,17 +11,27 @@ const chatsListScreen = document.getElementById("chats-list-screen");
 const activeChatScreen = document.getElementById("active-chat-screen");
 
 // Architecture Context State Machine Control Maps 
-let currentUser = JSON.parse(localStorage.getItem("funtok_user")) || null;
+let currentUser = JSON.parse(localStorage.getItem("funtok_user")) || { username: "@guest_surfer", avatar: "" };
 let localFollowCache = new Set(JSON.parse(localStorage.getItem("funtok_follows")) || []);
 let followedCount = localFollowCache.size;
 let followersCount = parseInt(localStorage.getItem("funtok_followers_count")) || 142;
 
 // Local Mock Database Configuration Arrays 
 let demo = [
- { id: 101, user_id: "u1", username: "@iron_avenger", caption: "Iron-Man assembly sequence is simply unparalleled! 🦾 #marvel #ironman", video_url: "https://w3schools.com", avatar: "https://unsplash.com", likes_count: 5320, has_liked: false },
- { id: 102, user_id: "u2", username: "@heavy_haulers", caption: "Massive custom Truck driving down the open highway! 🚛 #trucklife #wheels", video_url: "https://w3schools.com", avatar: "https://unsplash.com", likes_count: 1204, has_liked: false },
- { id: 103, user_id: "u3", username: "@creative_moments", caption: "New trends, new memories. Live your best life. ✨ #vibes", video_url: "https://w3schools.com", avatar: "https://unsplash.com", likes_count: 850, has_liked: false }
+ { id: 101, user_id: "u1", username: "@iron_avenger", caption: "Iron-Man assembly sequence is simply unparalleled! 🦾 #marvel #ironman", video_url: "https://w3schools.com", avatar: "https://unsplash.com", likes_count: 5320, comments_count: 42, has_liked: false },
+ { id: 102, user_id: "u2", username: "@heavy_haulers", caption: "Massive custom Truck driving down the open highway! 🚛 #trucklife #wheels", video_url: "https://w3schools.com", avatar: "https://unsplash.com", likes_count: 1204, comments_count: 19, has_liked: false },
+ { id: 103, user_id: "u3", username: "@creative_moments", caption: "New trends, new memories. Live your best life. ✨ #vibes", video_url: "https://w3schools.com", avatar: "https://unsplash.com", likes_count: 850, comments_count: 8, has_liked: false }
 ];
+
+// Local Mock Storage for fallback comments structure map
+let localCommentsRepo = {
+  101: [
+    { username: "@tony_stark", avatar: "https://unsplash.com", text: "Brilliant video compilation layout!" },
+    { username: "@pepper_p", avatar: "https://unsplash.com", text: "Please share the background rendering settings." }
+  ],
+  102: [{ username: "@diesel_power", avatar: "https://unsplash.com", text: "Incredible engine architecture specs right there." }],
+  103: []
+};
 
 let chatThreads = [
   { id: "u1", username: "@iron_avenger", avatar: "https://unsplash.com", messages: [{ text: "Hey! Loved your recent video edit!", time: "10:30 AM", sentByMe: false }] },
@@ -35,7 +45,7 @@ function show(id) { document.getElementById(id).style.display = "flex"; }
 function hide(id) { document.getElementById(id).style.display = "none"; }
 function esc(s) { return String(s).replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "'" }[m])); }
 
-/* --- Global Media Feed Renderer Layout Engine (Replicates Screenshot Format) --- */
+/* --- Global Media Feed Renderer Layout Engine --- */
 function render(rows) {
   if (rows.length === 0) {
     feed.innerHTML = `<div class="fallback" style="font-size:16px; color:#aaa; text-align:center; padding-top:100px;">No videos found matching feed criteria...</div>`;
@@ -59,19 +69,28 @@ function render(rows) {
           <div class="caption">${esc(x.caption || "")}</div>
         </div>
         
-        <!-- TikTok Actions Bar Replicated on the Outside Right Side Margin -->
+        <!-- Actions Side Column -->
         <div class="actions">
           
-          <!-- Avatar Stack Frame Containing Floating Custom Cyan Trigger Action Item -->
+          <!-- Avatar Stack Frame -->
           <div class="feed-avatar-container">
-            <img class="feed-avatar-img" src="${esc(displayAvatar)}" alt="Creator Overlay Profile Badge">
+            <img class="feed-avatar-img" src="${esc(displayAvatar)}" alt="Creator Overlay">
             <button class="${badgeClass}" onclick="handleFollowToggle('${esc(x.user_id)}', this)">${badgeIcon}</button>
           </div>
           
+          <!-- Like Control -->
           <button class="act" onclick="like(this)">${x.has_liked ? '♥' : '♡'}</button>
           <span class="num">${x.likes_count || 0}</span>
           
-          <!-- Custom Vector Shield Graphic Icon Layout Replacement Segment -->
+          <!-- Interactive Comments Overlay Button Trigger -->
+          <button class="act" onclick="openCommentsDrawer(${x.id})" title="View Conversations">
+            <svg class="custom-icon-svg" viewBox="0 0 24 24">
+              <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/>
+            </svg>
+          </button>
+          <span class="num" id="card-comm-count-${x.id}">${x.comments_count || 0}</span>
+          
+          <!-- Custom Vector Shield Graphic Icon Layout for dynamic reports custom typed string inputs -->
           <button class="act" onclick="openReportWizard(${x.id})" title="Report Video Post Content">
             <svg class="custom-icon-svg" viewBox="0 0 24 24">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10zM11 7h2v2h-2V7zm0 4h2v6h-2v-6z"/>
@@ -102,7 +121,7 @@ function handleFollowToggle(creatorId, btnElement) {
   updateProfileStats();
 }
 
-/* --- Interactive Custom Written Text Content Query Reporting System --- */
+/* --- Upgraded Interactive Custom Text Query Reporting (Supabase Connected Table Pipeline) --- */
 function openReportWizard(videoId) {
   document.getElementById("reported-video-id").value = videoId;
   document.getElementById("custom-report-text").value = ""; 
@@ -110,8 +129,8 @@ function openReportWizard(videoId) {
   show("reportModal");
 }
 
-document.getElementById("submit-report-btn").onclick = function() {
-  const videoId = document.getElementById("reported-video-id").value;
+document.getElementById("submit-report-btn").onclick = async function() {
+  const videoId = parseInt(document.getElementById("reported-video-id").value);
   const typedReportText = document.getElementById("custom-report-text").value.trim();
   const msgPanel = document.getElementById("reportMsg");
 
@@ -121,94 +140,52 @@ document.getElementById("submit-report-btn").onclick = function() {
     return;
   }
 
-  // System output logger confirmation 
-  console.log(`Report submitted for Video ID ${videoId}. Context: "${typedReportText}"`);
+  if (sb) {
+    // Pipeline deployment direct into production reports schema table
+    const { error } = await sb.from("reports").insert([
+      { 
+        video_id: videoId, 
+        report_reason: typedReportText,
+        submitted_by: currentUser?.username || "@anonymous"
+      }
+    ]);
+    if (error) {
+      console.error("Supabase Save Error:", error);
+      msgPanel.style.color = "#ff4d4d";
+      msgPanel.textContent = "Database communication failure. Please try again.";
+      return;
+    }
+  } else {
+    console.log(`Fallback Sandbox Mode: Video ${videoId} reported with message context: "${typedReportText}"`);
+  }
 
   msgPanel.style.color = "#00f2fe";
-  msgPanel.textContent = "Success! Your text query statement has been processed.";
-  
+  msgPanel.textContent = "Success! Your text query statement has been logged.";
   setTimeout(() => { hide("reportModal"); }, 1600);
 };
 
-document.getElementById("close-report-btn").onclick = function() {
-  hide("reportModal");
-};
+document.getElementById("close-report-btn").onclick = function() { hide("reportModal"); };
 
-/* --- Global Media Sync and Integration Subsystems Engines --- */
-async function load() {
-  updateProfileStats();
-  if (!sb) {
-    render(demo);
-    return;
-  }
-  const { data, error } = await sb.from("videos").select("id,caption,video_url,user_id,profiles(username,avatar_url)").order("created_at", { ascending: false });
-  if (!error && data) {
-    let rows = data.map(v => ({
-      id: v.id,
-      user_id: v.user_id,
-      username: v.profiles?.username || "@user",
-      caption: v.caption,
-      video_url: v.video_url,
-      avatar: v.profiles?.avatar_url || "",
-      likes_count: 0,
-      has_liked: false
-    }));
-    render(rows);
-  } else {
-    render(demo);
-  }
-}
-
-async function like(b) {
-  const cardElement = b.closest('.card');
-  const videoId = parseInt(cardElement?.getAttribute('data-video-id'));
-  const countSpan = b.nextElementSibling;
-
-  if (!sb) {
-    let match = demo.find(v => v.id === videoId);
-    if (!match) return;
-    if (b.textContent === "♡") {
-      b.textContent = "♥";
-      match.has_liked = true;
-      match.likes_count++;
-    } else {
-      b.textContent = "♡";
-      match.has_liked = false;
-      match.likes_count = Math.max(0, match.likes_count - 1);
-    }
-    countSpan.textContent = match.likes_count;
-    return;
-  }
+/* --- Upgraded Comments Drawer Mechanics System Module (With Supabase Failover) --- */
+async function openCommentsDrawer(videoId) {
+  document.getElementById("comments-video-id").value = videoId;
+  document.getElementById("new-comment-input-field").value = "";
   
-  const user = sb.auth.user ? sb.auth.user() : null;
-  if (!user) { alert("Please log in to like videos!"); return; }
-  if (b.textContent === "♡") {
-    const { error } = await sb.from('likes').insert([{ user_id: user.id, video_id: videoId }]);
-    if (!error) { b.textContent = "♥"; countSpan.textContent = parseInt(countSpan.textContent) + 1; }
-  } else {
-    const { error } = await sb.from('likes').delete().eq('user_id', user.id).eq('video_id', videoId);
-    if (!error) { b.textContent = "♡"; countSpan.textContent = Math.max(0, parseInt(countSpan.textContent) - 1); }
-  }
+  show("commentsModal");
+  await refreshCommentsStreamDisplay(videoId);
 }
 
-function share() { navigator.clipboard?.writeText(location.href); alert("FunTok video link shared!"); }
+async function refreshCommentsStreamDisplay(videoId) {
+  const container = document.getElementById("comments-stream-container");
+  let commentsList = [];
 
-/* --- Sidebar Navigation Route Controller Interceptor Engine --- */
-document.querySelectorAll("nav button").forEach(btn => {
-  btn.onclick = (e) => {
-    const targetPage = btn.getAttribute("data-page");
-    if (!targetPage) return;
+  if (sb) {
+    const { data, error } = await sb.from("comments").select("username, avatar_url, comment_text").eq("video_id", videoId).order("created_at", { ascending: true });
+    if (!error && data) {
+      commentsList = data.map(c => ({ username: c.username, avatar: c.avatar_url, text: c.comment_text }));
+    }
+  } else {
+    commentsList = localCommentsRepo[videoId] || [];
+  }
 
-    feed.style.display = "none";
-    searchView.style.display = "none";
-    inboxView.style.display = "none";
-
-    document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-
-    if (targetPage === "home" || targetPage === "trending") {
-      feed.style.display = "flex";
-      load();
-    } else if (targetPage === "search") {
-      searchView.style.display = "block";
-      executeVideoSearch();
+  if (commentsList.length === 0) {
