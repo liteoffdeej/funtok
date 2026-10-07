@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FunTok</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: #0f0f11;
+      color: #ffffff;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Sidebar Navigation */
+    .sidebar {
+      width: 240px;
+      background-color: #000000;
+      border-right: 1px solid #222;
+      display: flex;
+      flex-direction: column;
+      padding: 20px 16px;
+      justify-content: space-between;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: 800;
+      color: #00f2fe;
+      margin-bottom: 30px;
+    }
+
+    .nav-links {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 10px;
+      border-radius: 8px;
+      color: #a0a0a0;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .nav-item.active, .nav-item:hover {
+      color: #ffffff;
+      background-color: #1a1a1a;
+    }
+
+    .upload-btn {
+      margin-top: auto;
+      background: linear-gradient(45deg, #00f2fe, #4facfe);
+      color: #000;
+      font-weight: 700;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 15px;
+    }
+
+    #video-upload-input {
+      display: none;
+    }
+
+    /* Feed Area */
+    .feed-container {
+      flex: 1;
+      height: 100vh;
+      overflow-y: scroll;
+      snap-type: y mandatory;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Video Card */
+    .video-card {
+      position: relative;
+      width: 100%;
+      max-width: 420px;
+      height: 100vh;
+      snap-align: start;
+      background-color: #111;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .video-card video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Side Action Bar */
+    .side-bar {
+      position: absolute;
+      right: 12px;
+      bottom: 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      z-index: 10;
+    }
+
+    .avatar-container {
+      position: relative;
+      cursor: pointer;
+    }
+
+    .avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 2px solid #fff;
+      object-fit: cover;
+    }
+
+    .follow-badge {
+      position: absolute;
+      bottom: -4px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #ff0050;
+      color: #fff;
+      font-size: 12px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+
+    .action-btn {
+      background: none;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .action-btn .icon {
+      font-size: 28px;
+    }
+
+    .action-btn .count {
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .disc-container {
+      margin-top: 10px;
+    }
+
+    .disc {
+      width: 40px;
+      height: 40px;
+      background: #222;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 3px solid #333;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .spinning {
+      animation: spin 3s linear infinite;
+    }
+
+    /* Video Overlay Info */
+    .video-info {
+      position: absolute;
+      bottom: 20px;
+      left: 16px;
+      right: 80px;
+      z-index: 10;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+    }
+
+    .video-info h3 {
+      font-size: 16px;
+      margin-bottom: 6px;
+    }
+
+    .video-info p {
+      font-size: 14px;
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+
+    .music-track {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar Nav -->
+  <aside class="sidebar">
+    <div class="logo">FunTok</div>
+    <ul class="nav-links">
+      <li class="nav-item active">🏠 Home</li>
+      <li class="nav-item">🔥 Trending</li>
+      <li class="nav-item">🔍 Search</li>
+      <li class="nav-item">💬 Inbox</li>
+      <li class="nav-item">👤 Profile</li>
+    </ul>
+
+    <label class="upload-btn" for="video-upload-input">
+      + Upload Video
+    </label>
+    <input type="file" id="video-upload-input" accept="video/*">
+  </aside>
+
+  <!-- Feed Container -->
+  <main class="feed-container" id="feed"></main>
+
+  <!-- Application Logic -->
+  <script>
+    // Initial Fallback Videos
+    const posts = [
+      {
+        id: 1,
+        username: "fun_creator",
+        avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix",
+        caption: "Welcome to FunTok! Enjoy short videos 🚀 #funtok #viral",
+        music: "Original Sound - fun_creator",
+        likes: 128,
+        comments: ["Awesome!", "Love this video"],
+        videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+        isLiked: false,
+        isFollowed: false
+      },
+      {
+        id: 2,
+        username: "creative_mind",
+        avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka",
+        caption: "Testing out the video player flow ✨",
+        music: "Chill Beats - creative_mind",
+        likes: 256,
+        comments: ["Nice feed design"],
+        videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+        isLiked: false,
+        isFollowed: false
+      }
+    ];
+
+    // Render feed cards to screen
+    function renderFeed() {
+      const feedContainer = document.getElementById("feed");
+      feedContainer.innerHTML = "";
+
+      posts.forEach((post, index) => {
+        const card = document.createElement("div");
+        card.className = "video-card";
+        card.innerHTML = `
+          <video src="${post.videoUrl}" loop playsinline onclick="togglePlay(this)"></video>
+          
+          <div class="side-bar">
+            <div class="avatar-container" onclick="toggleFollow(${index})">
+              <img src="${post.avatar}" class="avatar" alt="${post.username}">
+              <span class="follow-badge">${post.isFollowed ? '✓' : '+'}</span>
+            </div>
+            
+            <button class="action-btn" onclick="toggleLike(${index})">
+              <span class="icon">${post.isLiked ? '❤️' : '🤍'}</span>
+              <span class="count">${post.likes}</span>
+            </button>
+            
+            <button class="action-btn" onclick="openComments(${index})">
+              <span class="icon">💬</span>
+              <span class="count">${post.comments.length}</span>
+            </button>
+            
+            <button class="action-btn" onclick="reportPost(${index})">
+              <span class="icon">🚨</span>
+            </button>
+            
+            <div class="disc-container">
+              <div class="disc spinning">🎵</div>
+            </div>
+          </div>
+
+          <div class="video-info">
+            <h3>@${post.username}</h3>
+            <p>${post.caption}</p>
+            <p class="music-track">🎵 ${post.music}</p>
+          </div>
+        `;
+        feedContainer.appendChild(card);
+      });
+    }
+
+    // Interactive Handlers
+    function togglePlay(video) {
+      if (video.paused) {
+        video.play();
+      } else {
+        video.pause();
+      }
+    }
+
+    function toggleLike(index) {
+      posts[index].isLiked = !posts[index].isLiked;
+      posts[index].likes += posts[index].isLiked ? 1 : -1;
+      renderFeed();
+    }
+
+    function toggleFollow(index) {
+      posts[index].isFollowed = !posts[index].isFollowed;
+      renderFeed();
+    }
+
+    function openComments(index) {
+      const comment = prompt("Leave a comment:");
+      if (comment) {
+        posts[index].comments.push(comment);
+        renderFeed();
+      }
+    }
+
+    function reportPost(index) {
+      alert(`Report submitted for post by @${posts[index].username}`);
+    }
+
+    // Video Upload Handler
+    document.getElementById("video-upload-input").addEventListener("change", function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const videoObjectUrl = URL.createObjectURL(file);
+        posts.unshift({
+          id: Date.now(),
+          username: "you",
+          avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=User",
+          caption: file.name,
+          music: "Original Sound - you",
+          likes: 0,
+          comments: [],
+          videoUrl: videoObjectUrl,
+          isLiked: false,
+          isFollowed: false
+        });
+        renderFeed();
+      }
+    });
+
+    // Initialize Feed
+    renderFeed();
+  </script>
+</body>
+</html>
