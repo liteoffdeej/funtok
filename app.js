@@ -135,33 +135,39 @@ function render(rows) {
         </div>
         
         <div class="actions">
+          <!-- 1. CREATOR AVATAR & FOLLOW (+) BADGE -->
           <div class="feed-avatar-container" onclick="openDirectChat('${esc(x.user_id)}')">
             <img class="feed-avatar-img" src="${esc(displayAvatar)}" alt="Creator Overlay">
             <button class="${badgeClass}" onclick="event.stopPropagation(); handleFollowToggle('${esc(x.user_id)}', this)">${badgeIcon}</button>
           </div>
           
+          <!-- 2. LIKE BUTTON -->
           <button class="act ${x.has_liked ? 'liked' : ''}" onclick="like(${x.id}, this)">
             ${x.has_liked ? '♥' : '♡'}
           </button>
           <span class="num" id="like-count-${x.id}">${x.likes_count || 0}</span>
           
+          <!-- 3. COMMENTS BUTTON (SVG ICON) -->
           <button class="act" onclick="openCommentsDrawer(${x.id})" title="View Conversations">
-            <svg class="custom-icon-svg" viewBox="0 0 24 24">
+            <svg class="custom-icon-svg" viewBox="0 0 24 24" width="22" height="22" fill="#ffffff">
               <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/>
             </svg>
           </button>
           <span class="num" id="card-comm-count-${x.id}">${x.comments_count || 0}</span>
           
+          <!-- 4. REPORT BUTTON (SVG ICON) -->
           <button class="act" onclick="openReportWizard(${x.id})" title="Report Video Post Content">
-            <svg class="custom-icon-svg" viewBox="0 0 24 24">
+            <svg class="custom-icon-svg" viewBox="0 0 24 24" width="22" height="22" fill="#ffffff">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10zM11 7h2v2h-2V7zm0 4h2v6h-2v-6z"/>
             </svg>
           </button>
           <span class="num">Report</span>
           
+          <!-- 5. SHARE BUTTON -->
           <button class="act" onclick="shareVideo(${x.id})">↗</button>
           <span class="num">Share</span>
 
+          <!-- 6. ROTATING SOUND DISC -->
           <div class="disc-wrapper">
             <img class="disc-art" src="${esc(displayAvatar)}" alt="Sound Disc">
           </div>
