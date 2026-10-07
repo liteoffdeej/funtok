@@ -1,54 +1,117 @@
-/* --- Core Configurations and Storage Links Integration Setup --- */
+/* --- Core Configurations & Initialization --- */
 const cfg = window.FUNTOK_CONFIG || {};
 const ready = cfg.SUPABASE_URL?.startsWith("http") && cfg.SUPABASE_KEY && cfg.SUPABASE_KEY !== "YOUR_SUPABASE_PUBLISHABLE_OR_ANON_KEY";
 const sb = ready ? supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_KEY) : null;
 
-// Core Document References 
+// Core UI References
 const feed = document.getElementById("feed");
 const searchView = document.getElementById("search-view");
 const inboxView = document.getElementById("inbox-view");
+const profileView = document.getElementById("profile-view");
 const chatsListScreen = document.getElementById("chats-list-screen");
 const activeChatScreen = document.getElementById("active-chat-screen");
 
-// Architecture Context State Machine Control Maps 
-let currentUser = JSON.parse(localStorage.getItem("funtok_user")) || { username: "@guest_surfer", avatar: "" };
+// User Context & Local State
+let currentUser = JSON.parse(localStorage.getItem("funtok_user")) || { 
+  username: "@guest_surfer", 
+  avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80" 
+};
 let localFollowCache = new Set(JSON.parse(localStorage.getItem("funtok_follows")) || []);
-let followedCount = localFollowCache.size;
 let followersCount = parseInt(localStorage.getItem("funtok_followers_count")) || 142;
 
-// Local Mock Database Configuration Arrays 
+// Mock Data Repositories
 let demo = [
- { id: 101, user_id: "u1", username: "@iron_avenger", caption: "Iron-Man assembly sequence is simply unparalleled! 🦾 #marvel #ironman", video_url: "https://w3schools.com", avatar: "https://unsplash.com", likes_count: 5320, comments_count: 42, has_liked: false },
- { id: 102, user_id: "u2", username: "@heavy_haulers", caption: "Massive custom Truck driving down the open highway! 🚛 #trucklife #wheels", video_url: "https://w3schools.com", avatar: "https://unsplash.com", likes_count: 1204, comments_count: 19, has_liked: false },
- { id: 103, user_id: "u3", username: "@creative_moments", caption: "New trends, new memories. Live your best life. ✨ #vibes", video_url: "https://w3schools.com", avatar: "https://unsplash.com", likes_count: 850, comments_count: 8, has_liked: false }
+  { 
+    id: 101, 
+    user_id: "u1", 
+    username: "@iron_avenger", 
+    caption: "Assembly sequence is simply unparalleled! 🦾 #marvel #ironman", 
+    video_url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", 
+    avatar: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=150&q=80", 
+    sound_title: "Iron Man Theme - Marvel Studios",
+    likes_count: 5320, 
+    comments_count: 2, 
+    has_liked: false 
+  },
+  { 
+    id: 102, 
+    user_id: "u2", 
+    username: "@heavy_haulers", 
+    caption: "Massive truck cruising open highways! 🚛 #trucklife #wheels", 
+    video_url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4", 
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80", 
+    sound_title: "Highway Vibe Sounds - Original Audio",
+    likes_count: 1204, 
+    comments_count: 1, 
+    has_liked: false 
+  },
+  { 
+    id: 103, 
+    user_id: "u3", 
+    username: "@creative_moments", 
+    caption: "New trends, new memories. Live your best life. ✨ #vibes", 
+    video_url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4", 
+    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80", 
+    sound_title: "Chillout Beats - FunTok Music",
+    likes_count: 850, 
+    comments_count: 0, 
+    has_liked: false 
+  }
 ];
 
-// Local Mock Storage for fallback comments structure map
 let localCommentsRepo = {
   101: [
-    { username: "@tony_stark", avatar: "https://unsplash.com", text: "Brilliant video compilation layout!" },
-    { username: "@pepper_p", avatar: "https://unsplash.com", text: "Please share the background rendering settings." }
+    { username: "@tony_stark", avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80", text: "Brilliant video compilation layout!" },
+    { username: "@pepper_p", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80", text: "Please share the background rendering settings." }
   ],
-  102: [{ username: "@diesel_power", avatar: "https://unsplash.com", text: "Incredible engine architecture specs right there." }],
+  102: [{ username: "@diesel_power", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80", text: "Incredible engine architecture specs right there." }],
   103: []
 };
 
 let chatThreads = [
-  { id: "u1", username: "@iron_avenger", avatar: "https://unsplash.com", messages: [{ text: "Hey! Loved your recent video edit!", time: "10:30 AM", sentByMe: false }] },
-  { id: "u2", username: "@heavy_haulers", avatar: "https://unsplash.com", messages: [{ text: "That truck setup is incredible, where was it filmed?", time: "Yesterday", sentByMe: true }] },
-  { id: "u3", username: "@creative_moments", avatar: "https://unsplash.com", messages: [{ text: "Thanks for the support! Let's collaborate soon.", time: "Monday", sentByMe: false }] }
+  { id: "u1", username: "@iron_avenger", avatar: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=150&q=80", messages: [{ text: "Hey! Loved your recent video edit!", time: "10:30 AM", sentByMe: false }] },
+  { id: "u2", username: "@heavy_haulers", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80", messages: [{ text: "That truck setup is incredible, where was it filmed?", time: "Yesterday", sentByMe: true }] },
+  { id: "u3", username: "@creative_moments", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80", messages: [{ text: "Thanks for the support! Let's collaborate soon.", time: "Monday", sentByMe: false }] }
 ];
 let activeChatUserId = null;
 
-// Global Helper Logic Control Routines 
+// Helpers
 function show(id) { document.getElementById(id).style.display = "flex"; }
 function hide(id) { document.getElementById(id).style.display = "none"; }
-function esc(s) { return String(s).replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "'" }[m])); }
+function esc(s) { return String(s).replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m])); }
 
-/* --- Global Media Feed Renderer Layout Engine --- */
+/* --- Navigation & View Controller --- */
+document.querySelectorAll(".nav-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+
+    const page = btn.getAttribute("data-page");
+    feed.style.display = "none";
+    searchView.style.display = "none";
+    inboxView.style.display = "none";
+    profileView.style.display = "none";
+
+    if (page === "home" || page === "trending") {
+      feed.style.display = "flex";
+      render(demo);
+    } else if (page === "search") {
+      searchView.style.display = "block";
+      executeVideoSearch();
+    } else if (page === "inbox") {
+      inboxView.style.display = "block";
+      renderChatsList();
+    } else if (page === "profile") {
+      profileView.style.display = "block";
+      updateProfileStats();
+    }
+  });
+});
+
+/* --- Media Feed Renderer --- */
 function render(rows) {
   if (rows.length === 0) {
-    feed.innerHTML = `<div class="fallback" style="font-size:16px; color:#aaa; text-align:center; padding-top:100px;">No videos found matching feed criteria...</div>`;
+    feed.innerHTML = `<div class="fallback-msg">No videos found matching criteria...</div>`;
     return;
   }
   
@@ -56,57 +119,76 @@ function render(rows) {
     const isFollowing = localFollowCache.has(x.user_id);
     const badgeClass = isFollowing ? "follow-badge following" : "follow-badge";
     const badgeIcon = isFollowing ? "✓" : "＋";
-    const displayAvatar = x.avatar || "https://unsplash.com";
+    const displayAvatar = x.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80";
 
     return `
       <section class="card" data-video-id="${x.id}">
-        ${x.video_url ? `<video src="${esc(x.video_url)}" autoplay muted loop playsinline></video>` : `<div class="fallback">▶</div>`}
+        ${x.video_url ? `<video src="${esc(x.video_url)}" autoplay muted loop playsinline onclick="togglePlay(this)"></video>` : `<div class="fallback">▶</div>`}
         <div class="shade"></div>
         
-        <!-- Creator Info Content Box Block Elements Left Alignment -->
+        <!-- Creator Info Area -->
         <div class="info">
           <div class="user">${esc(x.username || "@user")}</div>
           <div class="caption">${esc(x.caption || "")}</div>
+          <div class="music-track">🎵 <span>${esc(x.sound_title || "Original Audio")}</span></div>
         </div>
         
-        <!-- Actions Side Column -->
+        <!-- Actions Right Column -->
         <div class="actions">
-          
-          <!-- Avatar Stack Frame -->
-          <div class="feed-avatar-container">
+          <div class="feed-avatar-container" onclick="openDirectChat('${esc(x.user_id)}')">
             <img class="feed-avatar-img" src="${esc(displayAvatar)}" alt="Creator Overlay">
-            <button class="${badgeClass}" onclick="handleFollowToggle('${esc(x.user_id)}', this)">${badgeIcon}</button>
+            <button class="${badgeClass}" onclick="event.stopPropagation(); handleFollowToggle('${esc(x.user_id)}', this)">${badgeIcon}</button>
           </div>
           
-          <!-- Like Control -->
-          <button class="act" onclick="like(this)">${x.has_liked ? '♥' : '♡'}</button>
-          <span class="num">${x.likes_count || 0}</span>
+          <button class="act ${x.has_liked ? 'liked' : ''}" onclick="like(${x.id}, this)">
+            ${x.has_liked ? '♥' : '♡'}
+          </button>
+          <span class="num" id="like-count-${x.id}">${x.likes_count || 0}</span>
           
-          <!-- Interactive Comments Overlay Button Trigger -->
-          <button class="act" onclick="openCommentsDrawer(${x.id})" title="View Conversations">
-            <svg class="custom-icon-svg" viewBox="0 0 24 24">
-              <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/>
-            </svg>
+          <button class="act" onclick="openCommentsDrawer(${x.id})" title="Comments">
+            💬
           </button>
           <span class="num" id="card-comm-count-${x.id}">${x.comments_count || 0}</span>
           
-          <!-- Custom Vector Shield Graphic Icon Layout for dynamic reports custom typed string inputs -->
-          <button class="act" onclick="openReportWizard(${x.id})" title="Report Video Post Content">
-            <svg class="custom-icon-svg" viewBox="0 0 24 24">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10zM11 7h2v2h-2V7zm0 4h2v6h-2v-6z"/>
-            </svg>
+          <button class="act" onclick="openReportWizard(${x.id})" title="Report">
+            🚩
           </button>
           <span class="num">Report</span>
           
-          <button class="act" onclick="share()">↗</button>
+          <button class="act" onclick="shareVideo(${x.id})">↗</button>
           <span class="num">Share</span>
+
+          <!-- TikTok Spinning Audio Disc -->
+          <div class="disc-wrapper">
+            <img class="disc-art" src="${esc(displayAvatar)}" alt="Sound Disc">
+          </div>
         </div>
       </section>
     `;
   }).join("");
 }
 
-/* --- Interactive Follow Multi-Toggle Logic Control Engine Routine --- */
+function togglePlay(videoElem) {
+  if (videoElem.paused) {
+    videoElem.play();
+  } else {
+    videoElem.pause();
+  }
+}
+
+/* --- Likes & Follow Logic --- */
+function like(videoId, btnElement) {
+  const item = demo.find(v => v.id === videoId);
+  if (!item) return;
+
+  item.has_liked = !item.has_liked;
+  item.likes_count += item.has_liked ? 1 : -1;
+  
+  btnElement.classList.toggle("liked", item.has_liked);
+  btnElement.innerHTML = item.has_liked ? '♥' : '♡';
+  document.getElementById(`like-count-${videoId}`).textContent = item.likes_count;
+}
+
 function handleFollowToggle(creatorId, btnElement) {
   if (localFollowCache.has(creatorId)) {
     localFollowCache.delete(creatorId);
@@ -121,7 +203,16 @@ function handleFollowToggle(creatorId, btnElement) {
   updateProfileStats();
 }
 
-/* --- Upgraded Interactive Custom Text Query Reporting (Supabase Connected Table Pipeline) --- */
+function shareVideo(videoId) {
+  if (navigator.share) {
+    navigator.share({ title: "FunTok Video", url: window.location.href });
+  } else {
+    navigator.clipboard.writeText(window.location.href);
+    alert("Video share link copied to clipboard!");
+  }
+}
+
+/* --- Report System --- */
 function openReportWizard(videoId) {
   document.getElementById("reported-video-id").value = videoId;
   document.getElementById("custom-report-text").value = ""; 
@@ -136,41 +227,32 @@ document.getElementById("submit-report-btn").onclick = async function() {
 
   if (!typedReportText) {
     msgPanel.style.color = "#ff4d4d";
-    msgPanel.textContent = "Error: Please type out a specific concern before sending.";
+    msgPanel.textContent = "Error: Please type out a concern before sending.";
     return;
   }
 
   if (sb) {
-    // Pipeline deployment direct into production reports schema table
     const { error } = await sb.from("reports").insert([
-      { 
-        video_id: videoId, 
-        report_reason: typedReportText,
-        submitted_by: currentUser?.username || "@anonymous"
-      }
+      { video_id: videoId, report_reason: typedReportText, submitted_by: currentUser.username }
     ]);
     if (error) {
-      console.error("Supabase Save Error:", error);
       msgPanel.style.color = "#ff4d4d";
-      msgPanel.textContent = "Database communication failure. Please try again.";
+      msgPanel.textContent = "Database communication failure.";
       return;
     }
-  } else {
-    console.log(`Fallback Sandbox Mode: Video ${videoId} reported with message context: "${typedReportText}"`);
   }
 
   msgPanel.style.color = "#00f2fe";
-  msgPanel.textContent = "Success! Your text query statement has been logged.";
-  setTimeout(() => { hide("reportModal"); }, 1600);
+  msgPanel.textContent = "Success! Report logged.";
+  setTimeout(() => hide("reportModal"), 1400);
 };
 
-document.getElementById("close-report-btn").onclick = function() { hide("reportModal"); };
+document.getElementById("close-report-btn").onclick = () => hide("reportModal");
 
-/* --- Upgraded Comments Drawer Mechanics System Module (With Supabase Failover) --- */
+/* --- TikTok Comments Drawer & Handlers --- */
 async function openCommentsDrawer(videoId) {
   document.getElementById("comments-video-id").value = videoId;
   document.getElementById("new-comment-input-field").value = "";
-  
   show("commentsModal");
   await refreshCommentsStreamDisplay(videoId);
 }
@@ -180,7 +262,7 @@ async function refreshCommentsStreamDisplay(videoId) {
   let commentsList = [];
 
   if (sb) {
-    const { data, error } = await sb.from("comments").select("username, avatar_url, comment_text").eq("video_id", videoId).order("created_at", { ascending: true });
+    const { data, error } = await sb.from("comments").select("username, avatar_url, comment_text").eq("video_id", videoId);
     if (!error && data) {
       commentsList = data.map(c => ({ username: c.username, avatar: c.avatar_url, text: c.comment_text }));
     }
@@ -189,3 +271,233 @@ async function refreshCommentsStreamDisplay(videoId) {
   }
 
   if (commentsList.length === 0) {
+    container.innerHTML = `<div style="color: #888; text-align: center; padding: 20px;">No comments yet. Be the first!</div>`;
+    return;
+  }
+
+  container.innerHTML = commentsList.map(c => `
+    <div class="comment-item">
+      <img src="${esc(c.avatar || currentUser.avatar)}" class="comment-avatar" alt="User">
+      <div class="comment-content">
+        <div class="comment-user">${esc(c.username)}</div>
+        <div class="comment-text">${esc(c.text)}</div>
+      </div>
+    </div>
+  `).join("");
+}
+
+async function submitNewComment() {
+  const videoId = parseInt(document.getElementById("comments-video-id").value);
+  const inputField = document.getElementById("new-comment-input-field");
+  const text = inputField.value.trim();
+
+  if (!text) return;
+
+  const newComment = { username: currentUser.username, avatar: currentUser.avatar, text: text };
+
+  if (sb) {
+    await sb.from("comments").insert([{ video_id: videoId, username: currentUser.username, avatar_url: currentUser.avatar, comment_text: text }]);
+  } else {
+    if (!localCommentsRepo[videoId]) localCommentsRepo[videoId] = [];
+    localCommentsRepo[videoId].push(newComment);
+  }
+
+  const targetItem = demo.find(v => v.id === videoId);
+  if (targetItem) {
+    targetItem.comments_count = (targetItem.comments_count || 0) + 1;
+    const countElem = document.getElementById(`card-comm-count-${videoId}`);
+    if (countElem) countElem.textContent = targetItem.comments_count;
+  }
+
+  inputField.value = "";
+  await refreshCommentsStreamDisplay(videoId);
+}
+
+/* --- Direct Messaging Engine (Inbox & Chat) --- */
+function renderChatsList() {
+  chatsListScreen.style.display = "flex";
+  activeChatScreen.style.display = "none";
+
+  chatsListScreen.innerHTML = chatThreads.map(chat => {
+    const lastMsg = chat.messages[chat.messages.length - 1] || { text: "No messages yet", time: "" };
+    return `
+      <div class="chat-row" onclick="openActiveChat('${chat.id}')">
+        <img src="${esc(chat.avatar)}" class="chat-row-avatar">
+        <div class="chat-row-details">
+          <div class="chat-row-meta">
+            <span class="chat-row-username">${esc(chat.username)}</span>
+            <span class="chat-row-time">${esc(lastMsg.time)}</span>
+          </div>
+          <div class="chat-row-snippet">${esc(lastMsg.text)}</div>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function openDirectChat(userId) {
+  let thread = chatThreads.find(c => c.id === userId);
+  if (!thread) {
+    const videoUser = demo.find(v => v.user_id === userId);
+    thread = {
+      id: userId,
+      username: videoUser ? videoUser.username : "@user",
+      avatar: videoUser ? videoUser.avatar : currentUser.avatar,
+      messages: []
+    };
+    chatThreads.push(thread);
+  }
+  
+  // Navigate to inbox view and activate chat
+  document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+  document.querySelector('[data-page="inbox"]').classList.add("active");
+  feed.style.display = "none";
+  searchView.style.display = "none";
+  profileView.style.display = "none";
+  inboxView.style.display = "block";
+
+  openActiveChat(userId);
+}
+
+function openActiveChat(userId) {
+  activeChatUserId = userId;
+  const thread = chatThreads.find(c => c.id === userId);
+  if (!thread) return;
+
+  chatsListScreen.style.display = "none";
+  activeChatScreen.style.display = "flex";
+  document.getElementById("chat-header-username").textContent = thread.username;
+
+  renderMessagesStream();
+}
+
+function renderMessagesStream() {
+  const thread = chatThreads.find(c => c.id === activeChatUserId);
+  if (!thread) return;
+
+  const stream = document.getElementById("chat-conversation-stream");
+  stream.innerHTML = thread.messages.map(m => `
+    <div class="bubble ${m.sentByMe ? 'sent' : 'received'}">
+      ${esc(m.text)}
+      <span class="bubble-time">${esc(m.time)}</span>
+    </div>
+  `).join("");
+
+  stream.scrollTop = stream.scrollHeight;
+}
+
+function sendLiveChatMessage() {
+  const input = document.getElementById("chat-reply-input");
+  const text = input.value.trim();
+  if (!text || !activeChatUserId) return;
+
+  const thread = chatThreads.find(c => c.id === activeChatUserId);
+  if (!thread) return;
+
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+  thread.messages.push({ text: text, time: timeStr, sentByMe: true });
+  input.value = "";
+  renderMessagesStream();
+}
+
+function backToChatsList() {
+  activeChatUserId = null;
+  renderChatsList();
+}
+
+/* --- Search Engine Functions --- */
+function executeVideoSearch() {
+  const query = document.getElementById("search-input").value.toLowerCase().trim();
+  const grid = document.getElementById("search-results-grid");
+
+  const filtered = demo.filter(v => 
+    v.caption.toLowerCase().includes(query) || 
+    v.username.toLowerCase().includes(query)
+  );
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #888; padding: 40px;">No results found for "${esc(query)}"</div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(v => `
+    <div class="search-grid-item" onclick="playSearchResult(${v.id})">
+      <video src="${esc(v.video_url)}" muted></video>
+      <div class="search-grid-overlay">
+        <span>${esc(v.username)}</span>
+      </div>
+    </div>
+  `).join("");
+}
+
+function playSearchResult(videoId) {
+  document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+  document.querySelector('[data-page="home"]').classList.add("active");
+  searchView.style.display = "none";
+  feed.style.display = "flex";
+  
+  const target = demo.filter(v => v.id === videoId);
+  render(target.length ? target : demo);
+}
+
+/* --- Profile & Post Management --- */
+function saveUserProfileSettings() {
+  const newUsername = document.getElementById("update-username-field").value.trim();
+  const newAvatar = document.getElementById("update-avatar-field").value.trim();
+
+  if (newUsername) currentUser.username = newUsername.startsWith("@") ? newUsername : `@${newUsername}`;
+  if (newAvatar) currentUser.avatar = newAvatar;
+
+  localStorage.setItem("funtok_user", JSON.stringify(currentUser));
+  updateProfileStats();
+  hide("profileModal");
+}
+
+function updateProfileStats() {
+  document.getElementById("profile-username-display").textContent = currentUser.username;
+  document.getElementById("profile-avatar-display").src = currentUser.avatar;
+  document.getElementById("profile-following-count").textContent = localFollowCache.size;
+  document.getElementById("profile-followers-count").textContent = followersCount;
+}
+
+function submitNewUploadedVideo() {
+  const caption = document.getElementById("upload-caption").value.trim();
+  const videoUrl = document.getElementById("upload-video-url").value.trim();
+
+  if (!caption || !videoUrl) {
+    alert("Please fill in both the caption and video link.");
+    return;
+  }
+
+  const newPost = {
+    id: Date.now(),
+    user_id: "me",
+    username: currentUser.username,
+    caption: caption,
+    video_url: videoUrl,
+    avatar: currentUser.avatar,
+    sound_title: "Original Sound - " + currentUser.username,
+    likes_count: 0,
+    comments_count: 0,
+    has_liked: false
+  };
+
+  demo.unshift(newPost);
+  document.getElementById("upload-caption").value = "";
+  document.getElementById("upload-video-url").value = "";
+  hide("uploadModal");
+
+  // Switch to home stream
+  document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+  document.querySelector('[data-page="home"]').classList.add("active");
+  searchView.style.display = "none";
+  inboxView.style.display = "none";
+  profileView.style.display = "none";
+  feed.style.display = "flex";
+  render(demo);
+}
+
+// Initial Boot Run
+render(demo);
