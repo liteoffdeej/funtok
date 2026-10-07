@@ -1,18 +1,18 @@
-/* --- Core Resets and Document Layout --- */
+/* --- Core Resets & Base Styles --- */
 * {
   box-sizing: border-box;
 }
 html, body {
   margin: 0;
   padding: 0;
-  background-color: #010103; /* Ultimate deep dark environment background mirroring the reference */
+  background-color: #010103;
   color: #fff;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   min-height: 100vh;
   overflow: hidden;
 }
 
-/* --- Layout Frame Restructuring: Replicating the TikTok Desktop View Layout --- */
+/* --- App Layout Architecture --- */
 #app {
   display: flex;
   width: 100vw;
@@ -21,7 +21,7 @@ html, body {
   overflow: hidden;
 }
 
-/* --- Left Side Navigation Fixed Structural Sidebar --- */
+/* --- Navigation Sidebar --- */
 nav {
   width: 260px;
   height: 100vh;
@@ -29,8 +29,6 @@ nav {
   border-right: 1px solid #202025;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  align-items: flex-start;
   padding: 24px 12px;
   flex-shrink: 0;
 }
@@ -45,7 +43,7 @@ nav {
   letter-spacing: -1px;
 }
 .logo b {
-  color: #00f2fe; /* Custom theme premium cyan accent color */
+  color: #00f2fe;
 }
 
 nav button {
@@ -56,7 +54,6 @@ nav button {
   font-size: 17px;
   font-weight: 700;
   display: flex;
-  flex-direction: row;
   gap: 18px;
   align-items: center;
   cursor: pointer;
@@ -76,8 +73,7 @@ nav button:hover {
   width: 28px;
 }
 
-/* --- Premium Theme Interactive Accents Overrides --- */
-.active {
+.nav-btn.active {
   color: #00f2fe !important;
 }
 
@@ -89,22 +85,20 @@ nav button:hover {
   justify-content: center !important;
   box-shadow: 0 4px 15px rgba(0, 242, 254, 0.25);
 }
-.upload-sidebar-btn:hover {
-  opacity: 0.95;
-}
-.upload-sidebar-btn .plus {
-  font-size: 20px !important;
-  color: #000 !important;
-  font-weight: 900;
-}
 
-/* --- Main Central Content Area Engine Viewport --- */
+/* --- Main Content Viewport --- */
 .content-viewport {
   flex: 1;
   height: 100vh;
   overflow: hidden;
   background: #000;
   position: relative;
+}
+
+.view-panel {
+  width: 100%;
+  height: 100vh;
+  overflow-y: auto;
 }
 
 .feed {
@@ -121,17 +115,16 @@ nav button:hover {
   display: none;
 }
 
-/* --- Video Card Framework Container Section --- */
+/* --- Video Card & Interface Overlay --- */
 .card {
   width: 100%;
-  max-width: 480px;
+  max-width: 420px;
   height: calc(100vh - 40px);
   margin: 20px 0;
   scroll-snap-align: start;
   position: relative;
   background: #050508;
   border-radius: 12px;
-  overflow: visible; /* Allows the right actions bar to extend outwards exactly like TikTok UI */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -140,56 +133,52 @@ nav button:hover {
 .card video {
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  background-color: #000;
+  object-fit: cover;
   border-radius: 12px;
-}
-
-.fallback {
-  height: 100%;
-  display: grid;
-  place-items: center;
-  font-size: 64px;
-  color: #333;
+  cursor: pointer;
 }
 
 .shade {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 40%, transparent 100%);
+  background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.1) 50%, transparent 100%);
   z-index: 1;
   pointer-events: none;
   border-radius: 12px;
 }
 
-/* --- Content Information Overlays Left Side --- */
 .info {
   position: absolute;
   left: 16px;
   bottom: 24px;
   z-index: 2;
   text-shadow: 0 2px 8px rgba(0,0,0,0.9);
-  max-width: 82%;
+  max-width: 80%;
 }
 .user {
   font-weight: 800;
   font-size: 18px;
   color: #fff;
-  display: flex;
-  align-items: center;
-  gap: 4px;
 }
 .caption {
-  margin-top: 8px;
-  font-size: 14.5px;
+  margin-top: 6px;
+  font-size: 14px;
   color: #e5e7eb;
   line-height: 1.4;
 }
+.music-track {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #00f2fe;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
 
-/* --- Action Column Floating Layout on the Right Outside Edge --- */
+/* --- Video Action Column & Animations --- */
 .actions {
   position: absolute;
-  right: -75px; /* Shifts the action bar right outside the video box to track with modern desktop formats */
+  right: -70px;
   bottom: 30px;
   z-index: 3;
   display: flex;
@@ -205,7 +194,7 @@ nav button:hover {
   border-radius: 50%;
   width: 48px;
   height: 48px;
-  font-size: 22px;
+  font-size: 20px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -213,25 +202,28 @@ nav button:hover {
   transition: transform 0.2s ease, background-color 0.2s ease;
 }
 .act:hover {
-  transform: scale(1.08);
+  transform: scale(1.1);
   background-color: #2e2e36;
+}
+.act.liked {
+  color: #ff2b54;
 }
 
 .num {
   font-size: 12px;
   font-weight: 600;
   color: #aaa;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
   text-align: center;
   margin-top: 2px;
 }
 
-/* --- Avatar Stack and Integrated Follow Badge Asset Shape --- */
 .feed-avatar-container {
   position: relative;
-  width: 50px;
-  height: 50px;
-  margin-bottom: 18px;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 16px;
+  cursor: pointer;
 }
 .feed-avatar-img {
   width: 100%;
@@ -245,56 +237,51 @@ nav button:hover {
   bottom: -6px;
   left: 50%;
   transform: translateX(-50%);
-  background: #00f2fe; /* Custom theme responsive styling value */
+  background: #00f2fe;
   color: #000;
   border: none;
   border-radius: 50%;
-  width: 22px;
-  height: 22px;
-  font-size: 15px;
+  width: 20px;
+  height: 20px;
+  font-size: 13px;
   font-weight: bold;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 3px 6px rgba(0,0,0,0.4);
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  padding: 0;
 }
 .follow-badge.following {
   background: #00a884;
   color: #fff;
-  transform: translateX(-50%) rotate(360deg);
 }
 
-/* --- Vector Custom Icons Styling Specs --- */
-.custom-icon-svg {
-  width: 22px;
-  height: 22px;
-  fill: #ffffff;
+/* Spinning Disc Effect */
+.disc-wrapper {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #111;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 10px;
+  animation: spin 6s linear infinite;
+}
+.disc-art {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+@keyframes spin {
+  100% { transform: rotate(360deg); }
 }
 
-/* --- Responsive Layout Fallback Switch rules for smaller viewport window displays --- */
-@media (max-width: 820px) {
-  #app { flex-direction: column; }
-  nav { width: 100%; height: 65px; flex-direction: row; position: fixed !important; bottom: 0; left: 0; z-index: 100; border-right: 0; border-top: 1px solid #202025; padding: 0; }
-  nav button { flex: 1; flex-direction: column; gap: 2px; font-size: 11px; justify-content: center; align-items: center; text-align: center; padding: 6px 0; margin-bottom: 0; }
-  .logo-container, .upload-sidebar-btn { display: none !important; }
-  .content-viewport { height: calc(100vh - 65px); }
-  .actions { right: 12px; bottom: 60px; }
-  .card { max-width: 100%; height: calc(100vh - 85px); margin: 10px 0; }
-}
-
-/* --- Search Engine View Panel Layout --- */
-.view-panel {
-  width: 100%;
-  height: 100vh;
-  background: #0b0b0f;
-  overflow-y: auto;
-}
+/* --- Search View --- */
 .search-header-box {
   max-width: 600px;
-  margin: 0 auto 24px auto;
+  margin: 30px auto;
+  padding: 0 16px;
 }
 .search-header-box input {
   width: 100%;
@@ -311,10 +298,11 @@ nav button:hover {
 }
 .search-grid-layout {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 16px;
-  max-width: 1100px;
+  max-width: 1000px;
   margin: 0 auto;
+  padding: 0 16px;
 }
 .search-grid-item {
   position: relative;
@@ -323,15 +311,27 @@ nav button:hover {
   border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
-  border: 1px solid #202025;
 }
 .search-grid-item video {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
+.search-grid-overlay {
+  position: absolute;
+  bottom: 0;
+  inset-x: 0;
+  padding: 8px;
+  background: linear-gradient(transparent, rgba(0,0,0,0.8));
+  font-size: 12px;
+}
 
-/* --- WhatsApp Architecture Messaging Interface Custom View Classes --- */
+/* --- Inbox & Messaging Center --- */
+.chats-screen {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
 .chat-row {
   display: flex;
   align-items: center;
@@ -339,38 +339,57 @@ nav button:hover {
   padding: 16px 24px;
   border-bottom: 1px solid #16161a;
   cursor: pointer;
-  transition: background-color 0.2s ease;
 }
-.chat-row:hover {
-  background: #16161a;
-}
+.chat-row:hover { background: #16161a; }
+.chat-row-avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; }
 .chat-row-details { flex: 1; }
 .chat-row-meta { display: flex; justify-content: space-between; align-items: center; }
-.chat-row-username { font-weight: bold; color: #fff; font-size: 15px; }
+.chat-row-username { font-weight: bold; color: #fff; }
 .chat-row-time { font-size: 11px; color: #8696a0; }
-.chat-row-snippet { font-size: 13px; color: #8696a0; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 400px; }
+.chat-row-snippet { font-size: 13px; color: #8696a0; margin-top: 4px; }
 
+.active-chat-screen {
+  width: 100%;
+  flex-direction: column;
+  height: 100vh;
+}
 .chat-header-banner { background: #16161a; padding: 16px 24px; display: flex; align-items: center; gap: 16px; border-bottom: 1px solid #202025; }
 .back-btn { background: none; border: 0; color: #00f2fe; font-weight: bold; cursor: pointer; font-size: 15px; }
 .chat-title { font-weight: bold; font-size: 17px; }
 .chat-bubbles-stream { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; background: #08080b; }
 
-.bubble { max-width: 70%; padding: 10px 14px; border-radius: 10px; font-size: 14.5px; line-height: 1.4; word-wrap: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+.bubble { max-width: 70%; padding: 10px 14px; border-radius: 12px; font-size: 14.5px; line-height: 1.4; word-wrap: break-word; }
 .bubble.received { background: #202c33; color: #e9edef; align-self: flex-start; border-top-left-radius: 0; }
 .bubble.sent { background: #005c4b; color: #e9edef; align-self: flex-end; border-top-right-radius: 0; }
-.bubble-time { font-size: 9px; color: #8696a0; text-align: right; margin-top: 5px; display: block; }
+.bubble-time { font-size: 9px; color: #8696a0; text-align: right; margin-top: 4px; display: block; }
 
 .chat-input-bar { display: flex; padding: 16px 20px; background: #101014; gap: 12px; border-top: 1px solid #202025; }
 .chat-input-bar input { flex: 1; padding: 12px 16px; background: #1c1c24; border: 1px solid #2b2b32; border-radius: 8px; color: #fff; }
 .chat-input-bar button { padding: 12px 24px; background: #00f2fe; color: #000; border: 0; font-weight: bold; border-radius: 8px; cursor: pointer; }
 
-/* --- Popups and Custom Modals System UI Framework overlay layers --- */
+/* --- Profile View --- */
+.profile-card {
+  max-width: 400px;
+  margin: 60px auto;
+  text-align: center;
+  padding: 30px;
+  background: #121216;
+  border-radius: 16px;
+  border: 1px solid #22222a;
+}
+.profile-avatar { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; margin-bottom: 12px; border: 2px solid #00f2fe; }
+.profile-stats { display: flex; justify-content: space-around; margin: 24px 0; }
+.profile-stats div { display: flex; flex-direction: column; }
+.profile-stats strong { font-size: 18px; color: #fff; }
+.profile-stats span { font-size: 12px; color: #888; }
+
+/* --- Modals & Comments Drawer --- */
 .modal {
   position: fixed;
   z-index: 200;
   inset: 0;
-  background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(10px);
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
   display: none;
   align-items: center;
   justify-content: center;
@@ -378,20 +397,44 @@ nav button:hover {
 }
 .panel {
   width: 100%;
-  max-width: 460px;
+  max-width: 440px;
   background: #121216;
   border-radius: 16px;
-  padding: 28px;
-  box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+  padding: 24px;
   border: 1px solid #22222a;
   position: relative;
 }
-.panel h3 { margin-top: 0; font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
-.panel p { color: #9ca3af; font-size: 14px; line-height: 1.5; margin-bottom: 16px; }
+.close { position: absolute; right: 16px; top: 16px; background: none; border: 0; color: #aaa; font-size: 18px; cursor: pointer; }
 
-.panel textarea {
+.comments-drawer { height: 70vh; display: flex; flex-direction: column; }
+.comments-scroll-area { flex: 1; overflow-y: auto; margin: 16px 0; display: flex; flex-direction: column; gap: 14px; }
+.comment-item { display: flex; gap: 12px; align-items: flex-start; }
+.comment-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
+.comment-user { font-weight: bold; font-size: 12px; color: #aaa; }
+.comment-text { font-size: 14px; color: #fff; margin-top: 2px; }
+.comments-footer-input-row { display: flex; gap: 8px; }
+.comments-footer-input-row input { flex: 1; padding: 10px 14px; background: #09090c; border: 1px solid #22222a; border-radius: 20px; color: #fff; }
+.comments-footer-input-row button { background: #00f2fe; border: 0; padding: 0 16px; border-radius: 20px; font-weight: bold; cursor: pointer; }
+
+/* Buttons & Inputs */
+.btn-primary { width: 100%; padding: 12px; background: #00f2fe; color: #000; border: 0; border-radius: 8px; font-weight: bold; cursor: pointer; }
+.row-input-group input, .panel textarea, .panel input[type="text"] {
   width: 100%;
-  height: 120px;
-  padding: 14px;
-  margin: 8px 0 14px 0;
+  padding: 12px;
   background: #09090c;
+  border: 1px solid #22222a;
+  border-radius: 8px;
+  color: #fff;
+  margin-bottom: 12px;
+}
+
+/* Mobile Responsive Switch */
+@media (max-width: 820px) {
+  #app { flex-direction: column; }
+  nav { width: 100%; height: 60px; flex-direction: row; position: fixed; bottom: 0; left: 0; z-index: 100; border-right: 0; border-top: 1px solid #202025; padding: 0; }
+  nav button { flex: 1; flex-direction: column; gap: 2px; font-size: 10px; justify-content: center; align-items: center; padding: 4px 0; margin: 0; }
+  .logo-container, .upload-sidebar-btn { display: none !important; }
+  .content-viewport { height: calc(100vh - 60px); }
+  .actions { right: 12px; bottom: 40px; }
+  .card { max-width: 100%; height: calc(100vh - 60px); margin: 0; border-radius: 0; }
+}
