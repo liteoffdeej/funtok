@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>FunTok - Premium Responsive Platform</title>
   <link rel="stylesheet" href="style.css">
-  <!-- Supabase CDN Client Dependency Link Wrapper -->
+  <!-- Supabase CDN Client Dependency -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
   <div id="app">
     
-    <!-- Desktop Left Sidebar Navigation & Mobile Bottom Bar Dual-Mode Controller -->
+    <!-- Left Navigation Sidebar / Mobile Bottom Bar -->
     <nav class="navigation-sidebar">
       <div class="logo-container">
         <span class="logo">Fun<b>Tok</b></span>
@@ -41,13 +41,13 @@
       </button>
     </nav>
 
-    <!-- Main Content Dynamic Viewport Frame -->
+    <!-- Main Content Viewport -->
     <main class="content-viewport">
       
-      <!-- Video Live Feed Stream Panel View Container -->
+      <!-- Video Live Feed View Container -->
       <div id="feed" class="feed view-panel"></div>
 
-      <!-- Professional Dynamic Grid Interactive Search Layout Panel -->
+      <!-- Search Grid View Panel -->
       <div id="search-view" class="view-panel" style="display: none;">
         <div class="search-header-box">
           <input type="text" id="search-input" placeholder="Search archive database keywords..." oninput="executeVideoSearch()">
@@ -55,12 +55,10 @@
         <div id="search-results-grid" class="search-grid-layout"></div>
       </div>
 
-      <!-- Conversational Interaction Screen Messaging Center Layout Wrapper -->
+      <!-- Inbox Messaging Center -->
       <div id="inbox-view" class="view-panel" style="display: none;">
-        <!-- WhatsApp Architecture Thread Container Frame -->
         <div id="chats-list-screen" style="width: 100%; display: flex; flex-direction: column;"></div>
         
-        <!-- Active Dialog Workspace Content Overlay View Window -->
         <div id="active-chat-screen" style="width: 100%; display: none; flex-direction: column; height: 100%;">
           <div class="chat-header-banner">
             <button onclick="backToChatsList()" class="back-btn">← Back</button>
@@ -74,7 +72,7 @@
         </div>
       </div>
 
-      <!-- User Profile Screen Panel View -->
+      <!-- User Profile Screen Panel -->
       <div id="profile-view" class="view-panel" style="display: none;">
         <div class="profile-card">
           <img id="profile-avatar-display" class="profile-avatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80" alt="Profile Avatar">
@@ -92,7 +90,7 @@
 
   </div>
 
-  <!-- Interactive Custom Text Inquiry Reporting Wizard Modal Structure Overlay -->
+  <!-- Reporting Wizard Modal Overlay -->
   <div id="reportModal" class="modal">
     <div class="panel">
       <button id="close-report-btn" class="close">✕</button>
@@ -110,7 +108,7 @@
     </div>
   </div>
 
-  <!-- TikTok-Style Interactive Floating Comments Overlay Drawer -->
+  <!-- Comments Overlay Drawer -->
   <div id="commentsModal" class="modal">
     <div class="panel comments-drawer">
       <button id="close-comments-btn" class="close" onclick="hide('commentsModal')">✕</button>
@@ -126,7 +124,7 @@
     </div>
   </div>
 
-  <!-- Profile Configuration Setup Modal Layer -->
+  <!-- Profile Settings Modal -->
   <div id="profileModal" class="modal">
     <div class="panel">
       <button onclick="hide('profileModal')" class="close">✕</button>
@@ -140,7 +138,7 @@
     </div>
   </div>
 
-  <!-- Upload Form Interface Interaction Framework Panel Overlay -->
+  <!-- Upload Video Modal -->
   <div id="uploadModal" class="modal">
     <div class="panel">
       <button onclick="hide('uploadModal')" class="close">✕</button>
@@ -160,6 +158,8 @@
     </div>
   </div>
 
+  <!-- CONFIGURATION AND APPLICATION SCRIPTS -->
+  <script src="config.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
