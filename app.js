@@ -1,9 +1,9 @@
-/* --- Core Configurations and Storage Links Integration Setup --- */
+/* --- Core Configurations & Supabase Client Setup --- */
 const cfg = window.FUNTOK_CONFIG || {};
-const ready = cfg.SUPABASE_URL?.startsWith("http") && cfg.SUPABASE_KEY && cfg.SUPABASE_KEY !== "YOUR_SUPABASE_PUBLISHABLE_OR_ANON_KEY";
-const sb = ready ? supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_KEY) : null;
+const isConfigured = cfg.SUPABASE_URL && cfg.SUPABASE_URL.startsWith("http") && cfg.SUPABASE_KEY && cfg.SUPABASE_KEY !== "your-anon-public-key";
+const sb = isConfigured ? supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_KEY) : null;
 
-// Core Document References 
+// Core DOM Elements
 const feed = document.getElementById("feed");
 const searchView = document.getElementById("search-view");
 const inboxView = document.getElementById("inbox-view");
@@ -11,7 +11,7 @@ const profileView = document.getElementById("profile-view");
 const chatsListScreen = document.getElementById("chats-list-screen");
 const activeChatScreen = document.getElementById("active-chat-screen");
 
-// Context State Machine Control Maps
+// State
 let currentUser = JSON.parse(localStorage.getItem("funtok_user")) || { 
   username: "@guest_surfer", 
   avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80" 
@@ -19,7 +19,7 @@ let currentUser = JSON.parse(localStorage.getItem("funtok_user")) || {
 let localFollowCache = new Set(JSON.parse(localStorage.getItem("funtok_follows")) || []);
 let followersCount = parseInt(localStorage.getItem("funtok_followers_count")) || 142;
 
-// Local Mock Database Configuration Arrays 
+// Initial Video Feed Data
 let demo = [
   { 
     id: 101, 
@@ -59,7 +59,7 @@ let demo = [
   }
 ];
 
-// Local Mock Storage for fallback comments structure map
+// Fallback Local Comments Cache
 let localCommentsRepo = {
   101: [
     { username: "@tony_stark", avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80", text: "Brilliant video compilation layout!" },
@@ -69,6 +69,7 @@ let localCommentsRepo = {
   103: []
 };
 
+// Messaging Data
 let chatThreads = [
   { id: "u1", username: "@iron_avenger", avatar: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=150&q=80", messages: [{ text: "Hey! Loved your recent video edit!", time: "10:30 AM", sentByMe: false }] },
   { id: "u2", username: "@heavy_haulers", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80", messages: [{ text: "That truck setup is incredible, where was it filmed?", time: "Yesterday", sentByMe: true }] },
@@ -76,12 +77,12 @@ let chatThreads = [
 ];
 let activeChatUserId = null;
 
-// Global Helper Routines
+// Utility Functions
 function show(id) { document.getElementById(id).style.display = "flex"; }
 function hide(id) { document.getElementById(id).style.display = "none"; }
 function esc(s) { return String(s).replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m])); }
 
-/* --- Navigation & View Switcher Routing --- */
+/* --- Navigation & View Switching --- */
 document.querySelectorAll(".nav-btn").forEach(btn => {
   btn.addEventListener("click", () => {
     document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
@@ -109,7 +110,7 @@ document.querySelectorAll(".nav-btn").forEach(btn => {
   });
 });
 
-/* --- Global Media Feed Renderer Layout Engine --- */
+/* --- Video Feed Rendering Engine --- */
 function render(rows) {
   if (rows.length === 0) {
     feed.innerHTML = `<div class="fallback" style="font-size:16px; color:#aaa; text-align:center; padding-top:100px;">No videos found matching feed criteria...</div>`;
@@ -127,29 +128,23 @@ function render(rows) {
         ${x.video_url ? `<video src="${esc(x.video_url)}" autoplay muted loop playsinline onclick="togglePlay(this)"></video>` : `<div class="fallback">▶</div>`}
         <div class="shade"></div>
         
-        <!-- Creator Info Content Box Block Elements Left Alignment -->
         <div class="info">
           <div class="user">${esc(x.username || "@user")}</div>
           <div class="caption">${esc(x.caption || "")}</div>
           <div class="music-track">🎵 <span>${esc(x.sound_title || "Original Sound")}</span></div>
         </div>
         
-        <!-- Actions Side Column -->
         <div class="actions">
-          
-          <!-- Avatar Stack Frame -->
           <div class="feed-avatar-container" onclick="openDirectChat('${esc(x.user_id)}')">
             <img class="feed-avatar-img" src="${esc(displayAvatar)}" alt="Creator Overlay">
             <button class="${badgeClass}" onclick="event.stopPropagation(); handleFollowToggle('${esc(x.user_id)}', this)">${badgeIcon}</button>
           </div>
           
-          <!-- Like Control -->
           <button class="act ${x.has_liked ? 'liked' : ''}" onclick="like(${x.id}, this)">
             ${x.has_liked ? '♥' : '♡'}
           </button>
           <span class="num" id="like-count-${x.id}">${x.likes_count || 0}</span>
           
-          <!-- Interactive Comments Overlay Button Trigger -->
           <button class="act" onclick="openCommentsDrawer(${x.id})" title="View Conversations">
             <svg class="custom-icon-svg" viewBox="0 0 24 24">
               <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/>
@@ -157,7 +152,6 @@ function render(rows) {
           </button>
           <span class="num" id="card-comm-count-${x.id}">${x.comments_count || 0}</span>
           
-          <!-- Custom Vector Shield Graphic Icon Layout for dynamic reports custom typed string inputs -->
           <button class="act" onclick="openReportWizard(${x.id})" title="Report Video Post Content">
             <svg class="custom-icon-svg" viewBox="0 0 24 24">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10zM11 7h2v2h-2V7zm0 4h2v6h-2v-6z"/>
@@ -168,7 +162,6 @@ function render(rows) {
           <button class="act" onclick="shareVideo(${x.id})">↗</button>
           <span class="num">Share</span>
 
-          <!-- TikTok Spinning Audio Disc Feature -->
           <div class="disc-wrapper">
             <img class="disc-art" src="${esc(displayAvatar)}" alt="Sound Disc">
           </div>
@@ -186,7 +179,6 @@ function togglePlay(videoElem) {
   }
 }
 
-/* --- Interactive Follow Multi-Toggle Logic Control Engine Routine --- */
 function handleFollowToggle(creatorId, btnElement) {
   if (localFollowCache.has(creatorId)) {
     localFollowCache.delete(creatorId);
@@ -223,7 +215,7 @@ function shareVideo(videoId) {
   }
 }
 
-/* --- Upgraded Interactive Custom Text Query Reporting (Supabase Connected Table Pipeline) --- */
+/* --- Report Submissions --- */
 function openReportWizard(videoId) {
   document.getElementById("reported-video-id").value = videoId;
   document.getElementById("custom-report-text").value = ""; 
@@ -256,8 +248,6 @@ document.getElementById("submit-report-btn").onclick = async function() {
       msgPanel.textContent = "Database communication failure. Please try again.";
       return;
     }
-  } else {
-    console.log(`Fallback Sandbox Mode: Video ${videoId} reported with message context: "${typedReportText}"`);
   }
 
   msgPanel.style.color = "#00f2fe";
@@ -267,7 +257,7 @@ document.getElementById("submit-report-btn").onclick = async function() {
 
 document.getElementById("close-report-btn").onclick = function() { hide("reportModal"); };
 
-/* --- Upgraded Comments Drawer Mechanics System Module (With Supabase Failover) --- */
+/* --- Comments System --- */
 async function openCommentsDrawer(videoId) {
   document.getElementById("comments-video-id").value = videoId;
   document.getElementById("new-comment-input-field").value = "";
@@ -332,7 +322,7 @@ async function submitNewComment() {
   await refreshCommentsStreamDisplay(videoId);
 }
 
-/* --- Messaging Framework Engine (Inbox & Direct Chat) --- */
+/* --- Messaging Engine --- */
 function renderChatsList() {
   chatsListScreen.style.display = "flex";
   activeChatScreen.style.display = "none";
@@ -425,7 +415,7 @@ function backToChatsList() {
   renderChatsList();
 }
 
-/* --- Search Engine Routines --- */
+/* --- Search Engine --- */
 function executeVideoSearch() {
   const query = document.getElementById("search-input").value.toLowerCase().trim();
   const grid = document.getElementById("search-results-grid");
@@ -457,7 +447,7 @@ function playSearchResult(videoId) {
   render(target.length ? target : demo);
 }
 
-/* --- User Profile Management & Settings --- */
+/* --- Profile Management --- */
 function saveUserProfileSettings() {
   const newUsername = document.getElementById("update-username-field").value.trim();
   const newAvatar = document.getElementById("update-avatar-field").value.trim();
@@ -477,7 +467,7 @@ function updateProfileStats() {
   document.getElementById("profile-followers-count").textContent = followersCount;
 }
 
-/* --- Video Upload Submission Engine (Local File & URL support) --- */
+/* --- Video Upload Engine (File Selection & URL Upload) --- */
 async function submitNewUploadedVideo() {
   const caption = document.getElementById("upload-caption").value.trim();
   const fileInput = document.getElementById("upload-video-file");
@@ -544,5 +534,5 @@ async function submitNewUploadedVideo() {
   render(demo);
 }
 
-// Initial Boot Load Execution
+// Initial Run
 render(demo);
